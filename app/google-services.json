@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "406301427659",
+    "project_id": "garpom-7cf46",
+    "storage_bucket": "garpom-7cf46.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406301427659:android:58bf4841c4c4c9bd22d84e",
+        "android_client_info": {
+          "package_name": "mm.zamiec.garpom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJuoI6FhubToGigTrNL5_EEmX64JUNbY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
