@@ -3,4 +3,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="ok">Ok\n</string>
     <string name="alarm_permission_rationale">Without notification permissions, we won\'t be able to alert you, the alarms will still work inside the app</string>
+    <string name="bt_perm_needed">Bluetooth permission needed</string>
+    <string name="bt_perm_rationale">We need bluetooth permissions in order to find stations near you. Without it, you won\'t be able to configure and use your stations</string>
+    <string name="decline">Decline</string>
 </resources>

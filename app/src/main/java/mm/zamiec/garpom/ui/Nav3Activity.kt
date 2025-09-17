@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,9 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import mm.zamiec.garpom.bluetooth.BluetoothViewModel
 import mm.zamiec.garpom.firebase.log_token
 import mm.zamiec.garpom.permissions.NotificationPermissionViewModel
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
@@ -50,20 +55,23 @@ class Nav3Activity : ComponentActivity() {
 
 
     @Composable
-    fun NavExample(notificationViewModel: NotificationPermissionViewModel = viewModel()) {
+    fun NavExample(
+        notificationViewModel: NotificationPermissionViewModel = viewModel(),
+        bluetoothViewModel: BluetoothViewModel = viewModel()
+    ) {
         val backStack = rememberNavBackStack(Destination.Home)
 
         val context = LocalContext.current
-        val activity: Nav3Activity? = context.getActivityOrNull() as Nav3Activity?
+        val activity: Nav3Activity? = LocalActivity.current as Nav3Activity?
 
         val notificationPermissionGranted by notificationViewModel.isPermissionGranted.collectAsState()
         val notificationPreferenceEnabled by notificationViewModel.areNotificationsEnabled.collectAsState()
 
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { granted ->
-            notificationViewModel.updatePermission(granted)
-        }
+//        val launcher = rememberLauncherForActivityResult(
+//            contract = ActivityResultContracts.RequestPermission()
+//        ) { granted ->
+//            notificationViewModel.updatePermission(granted)
+//        }
 
         Scaffold(
             bottomBar = {
@@ -76,14 +84,17 @@ class Nav3Activity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-            ) {
                 NavDisplay(
+                    modifier = Modifier.padding(innerPadding),
+                    entryDecorators = listOf(
+                        rememberSceneSetupNavEntryDecorator(),
+                        rememberSavedStateNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
+                        Text("stack: ${backStack.toList() }}")
                         entry<Destination.Home> {
                             Column {
                                 Text("Home")
@@ -139,9 +150,10 @@ class Nav3Activity : ComponentActivity() {
                             }
                         }
                         entry<Destination.Configure> {
-                            Column {
-                                Text("Configure")
-                            }
+                            ConfigureScreen(bluetoothViewModel, onUnableToConfigure = {
+                                backStack.clear()
+                                backStack.add(Destination.Home)
+                            })
                         }
                         entry<Destination.Profile> {
                             Column {
@@ -150,17 +162,6 @@ class Nav3Activity : ComponentActivity() {
                         }
                     }
                 )
-            }
         }
-    }
-
-    fun Context.getActivityOrNull(): Activity? {
-        var context = this
-        while (context is ContextWrapper) {
-            if (context is Activity) return context
-            context = context.baseContext
-        }
-
-        return null
     }
 }

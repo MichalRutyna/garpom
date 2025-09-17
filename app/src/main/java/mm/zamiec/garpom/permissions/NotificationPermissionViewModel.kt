@@ -3,23 +3,21 @@ package mm.zamiec.garpom.permissions
 import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
-import android.preference.PreferenceGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.R
 
 class NotificationPermissionViewModel(
     private val app: Application
 ) : AndroidViewModel(app) {
     private val _timesClicked = MutableStateFlow(0)
 
-    private val _isPermissionGranted = MutableStateFlow(fetchPermissionsEnabled())
+    private val _isPermissionGranted = MutableStateFlow(fetchPreferenceEnabled())
     val isPermissionGranted: StateFlow<Boolean> = _isPermissionGranted.asStateFlow()
 
-    private val _areNotificationsEnabled = MutableStateFlow(fetchPermissionsEnabled())
+    private val _areNotificationsEnabled = MutableStateFlow(fetchPreferenceEnabled())
     val areNotificationsEnabled: StateFlow<Boolean> = _areNotificationsEnabled.asStateFlow()
 
     fun shouldGoToSettings(): Boolean {
@@ -33,10 +31,10 @@ class NotificationPermissionViewModel(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
         _isPermissionGranted.value = granted
-        _areNotificationsEnabled.value = fetchPermissionsEnabled()
+        _areNotificationsEnabled.value = fetchPreferenceEnabled()
     }
 
-    fun fetchPermissionsEnabled() : Boolean {
+    fun fetchPreferenceEnabled() : Boolean {
         return false
 //        TODO fetch from datastore
     }
