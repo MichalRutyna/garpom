@@ -21,7 +21,7 @@ import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.ui.ConfigureState
+import mm.zamiec.garpom.ui.screens.configure.ConfigureState
 import java.util.concurrent.Executor
 
 class BluetoothViewModel (

@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui
+package mm.zamiec.garpom.ui.screens.configure
 
 import android.Manifest
 import android.app.Activity.RESULT_CANCELED
@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.bluetooth.BluetoothViewModel
+import mm.zamiec.garpom.ui.screens.configure.ConfigureState
 
 val TAG = "ConfigureScreen"
 

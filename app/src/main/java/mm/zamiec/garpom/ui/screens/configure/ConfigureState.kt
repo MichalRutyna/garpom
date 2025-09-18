@@ -1,6 +1,4 @@
-package mm.zamiec.garpom.ui
-
-import android.graphics.Bitmap
+package mm.zamiec.garpom.ui.screens.configure
 
 public open class ConfigureState(
 ) {

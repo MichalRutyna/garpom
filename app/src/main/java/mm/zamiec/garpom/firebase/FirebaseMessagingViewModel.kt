@@ -1,39 +1,39 @@
 package mm.zamiec.garpom.firebase
 
 import android.app.Activity
-import android.content.Context
-import mm.zamiec.garpom.R
 import android.util.Log
-import android.widget.Toast
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.play.integrity.internal.ac
 import com.google.firebase.messaging.FirebaseMessaging
 
-private const val TAG = "FirebaseMessaging"
+class FirebaseMessagingViewModel : ViewModel() {
 
-fun log_token(activity: Activity) {
-    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-        if (!task.isSuccessful) {
-            Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-            return@OnCompleteListener
-        }
+    private val TAG = "FirebaseMessaging"
 
-        // Get new FCM registration token
-        val token = task.result
+    fun log_token(activity: Activity) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
 
-        // Log and toast
-        val msg = "Hello $token"
-        Log.d(TAG, msg)
-        Toast.makeText(activity.baseContext, msg, Toast.LENGTH_SHORT).show()
-    })
-    GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(activity)
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            val msg = "Hello $token"
+            Log.d(TAG, msg)
+        })
+        GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(activity)
 //    askNotificationPermission()
-}
+    }
 
-fun subscribe() {
 
-    FirebaseMessaging.getInstance().subscribeToTopic("test")
+
+    fun subscribe() {
+
+        FirebaseMessaging.getInstance().subscribeToTopic("test")
 //    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
 //        if (!task.isSuccessful) {
 //            Log.w(TAG, "Fetching FCM registration token failed", task.exception)
@@ -52,4 +52,5 @@ fun subscribe() {
 //    FirebaseMessaging.getInstance().subscribeToTopic("test")
 //    GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this)
 //    askNotificationPermission()
+    }
 }
