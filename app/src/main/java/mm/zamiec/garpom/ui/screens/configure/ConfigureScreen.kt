@@ -20,10 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.bluetooth.BluetoothViewModel
 import mm.zamiec.garpom.ui.screens.configure.ConfigureState
@@ -39,7 +41,7 @@ fun ConfigureScreen(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-    val configureState = bluetoothViewModel.uiState.collectAsState()
+    val configureState = bluetoothViewModel.uiState.collectAsStateWithLifecycle()
 
     val pairingLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
