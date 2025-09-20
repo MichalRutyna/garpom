@@ -39,6 +39,13 @@ fun AlarmsScreen(
         ) {
             Text("Show token")
         }
+        Button(
+            onClick = {
+
+            }
+        ) {
+            Text("Send token")
+        }
         LifecycleResumeEffect(Unit) {
             notificationViewModel.checkPermissions()
             onPauseOrDispose { }

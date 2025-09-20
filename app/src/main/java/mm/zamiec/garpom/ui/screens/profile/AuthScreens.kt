@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
@@ -47,6 +52,7 @@ import mm.zamiec.garpom.auth.AuthViewModel
 fun AuthRouteController(
     onAuthSuccess: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    isInSubNavigation: MutableState<Boolean>,
 ) {
     val backStack = rememberNavBackStack(AuthRoutes.PhoneInput)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -55,9 +61,7 @@ fun AuthRouteController(
     val uiState by authViewModel.uiState.collectAsState()
 
 
-
     LaunchedEffect(uiState) {
-        Log.d("aaa", ""+uiState)
         when (uiState) {
             is AuthUiState.Error -> {
                 val errorState = uiState as AuthUiState.Error
@@ -76,17 +80,19 @@ fun AuthRouteController(
             is AuthUiState.Loading -> {}
         }
     }
+    LaunchedEffect(uiState) {
+        isInSubNavigation.value = backStack.count() > 1
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column {
             Text("State: "+uiState)
+            Text("Stack: "+backStack.toList())
+            Text("IsInSub: "+isInSubNavigation.value)
             Button(onClick = {
-                scope.launch {
-                }
-            }) {
-                Text("Test")
-            }
+                Log.d("Test", ""+backStack.toList().count())
+            }) { Text("click")}
         }
         if (uiState == AuthUiState.Loading) {
             LoadingScreen()
@@ -99,7 +105,10 @@ fun AuthRouteController(
                     rememberSavedStateNavEntryDecorator(),
                 ),
                 backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
+                onBack = {
+                    backStack.removeLastOrNull()
+                    authViewModel.backed()
+                },
                 entryProvider = entryProvider {
                     entry<AuthRoutes.PhoneInput> {
                         PhoneNumberInputScreen()
@@ -200,30 +209,6 @@ fun CodeVerificationScreen() {
     }
 }
 
-@Composable
-fun SuccessScreen(onSignOut: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Authentication Successful!",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onSignOut,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Sign Out")
-        }
-    }
-}
 
 @Composable
 fun LoadingScreen() {

@@ -32,7 +32,9 @@ class FirebaseMessagingViewModel @Inject constructor() : ViewModel() {
 //    askNotificationPermission()
     }
 
+    fun send() {
 
+    }
 
     fun subscribe() {
 

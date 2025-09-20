@@ -8,16 +8,22 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
+import mm.zamiec.garpom.auth.AuthRepository
 import mm.zamiec.garpom.auth.AuthViewModel
 
 @Composable
 fun ProfileScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToAuth: () -> Unit
 ) {
-    val uiState = authViewModel.uiState.collectAsStateWithLifecycle()
     Column {
         Text("Profile")
+        Text("Name: "+profileViewModel.currentUser?.displayName)
+        Button(onClick = {
+            profileViewModel.test()
+        }) {
+            Text("Set name")
+        }
         Button(onClick = {
             onNavigateToAuth()
         }) {

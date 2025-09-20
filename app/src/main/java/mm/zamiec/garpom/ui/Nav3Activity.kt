@@ -1,42 +1,38 @@
 package mm.zamiec.garpom.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import dagger.hilt.android.AndroidEntryPoint
-import mm.zamiec.garpom.auth.AuthRepository
-import mm.zamiec.garpom.auth.AuthViewModel
-import mm.zamiec.garpom.bluetooth.BluetoothViewModel
-import mm.zamiec.garpom.firebase.FirebaseMessagingViewModel
-import mm.zamiec.garpom.permissions.NotificationPermissionViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
 import mm.zamiec.garpom.ui.navigation.Destination
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
+import mm.zamiec.garpom.ui.screens.profile.AuthRouteController
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
-import mm.zamiec.garpom.ui.screens.profile.AuthRouteController
 
 @AndroidEntryPoint
 class Nav3Activity : ComponentActivity() {
@@ -56,6 +52,8 @@ class Nav3Activity : ComponentActivity() {
     fun NavExample() {
         val backStack = rememberNavBackStack(Destination.Home)
 
+        var isInSubNavigation = remember { mutableStateOf(false) }
+
         Scaffold(
             bottomBar = {
                 AppNavigationBar(
@@ -67,7 +65,7 @@ class Nav3Activity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-//                Text(text = "backstack: " +backStack.toList())
+                Text(text = "backstack: " +backStack.toList())
                 NavDisplay(
                     modifier = Modifier.padding(innerPadding),
                     entryDecorators = listOf(
@@ -103,9 +101,19 @@ class Nav3Activity : ComponentActivity() {
                             AuthRouteController(onAuthSuccess = {
                                 backStack.removeLastOrNull()
                                 Log.d("Main", "AUTH SUCCESS")
-                            })
+                            },
+                            isInSubNavigation = isInSubNavigation)
                         }
-                    }
+                    },
+                    predictivePopTransitionSpec =
+                        if (!isInSubNavigation.value) {
+                            NavDisplay.defaultPredictivePopTransitionSpec
+                        } else {
+                            {
+                                slideInHorizontally(initialOffsetX = { 0 }) togetherWith
+                                        slideOutHorizontally(targetOffsetX = { 0 })
+                            }
+                        }
                 )
         }
     }

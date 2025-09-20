@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +48,7 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         phoneNumber: String,
         timeout: Long = 60L
     ): Flow<PhoneVerificationStatus> = callbackFlow {
+        Log.d(TAG, "launched phone verification flow")
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                 trySend(PhoneVerificationStatus.VerificationCompleted(credential))
@@ -72,7 +74,10 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
 
         PhoneAuthProvider.verifyPhoneNumber(options)
 
+        Log.d(TAG, "PhoneAuthProvider called")
+
         awaitClose { }
+        Log.d(TAG, "phone verification flow closed")
     }
 
     suspend fun getCredentialWithCode(
@@ -91,6 +96,13 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         } catch (e: Exception) {
             PhoneVerificationResult.Error(e.message ?: "Unknown error")
         }
+    }
+
+    fun test(){
+        val req = UserProfileChangeRequest.Builder()
+            .setDisplayName("Test")
+            .build()
+        currentUser?.updateProfile(req)
     }
 }
 

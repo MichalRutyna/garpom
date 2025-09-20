@@ -1,13 +1,21 @@
 package mm.zamiec.garpom.firebase
 
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import javax.inject.Inject
 import kotlin.collections.isNotEmpty
 import kotlin.let
 
-class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+class MyFirebaseMessagingService @Inject constructor(
+    var auth: FirebaseAuth,
+) : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         Log.d(TAG, "Refreshed token: $token")
 
@@ -38,8 +46,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun sendRegistrationToServer(token: String?) {
-        // TODO: Implement this method to send token to your app server.
         Log.d(TAG, "sendRegistrationTokenToServer($token)")
+        val deviceToken = hashMapOf(
+            "token" to token,
+            "timestamp" to FieldValue.serverTimestamp(),
+        )
+        if (auth.currentUser == null) {
+            Log.e(TAG, "Send token called, but no user in auth")
+            return
+        }
+        val userId = auth.currentUser!!.uid
+        Firebase.firestore.collection("fcmTokens").document(userId)
+            .set(deviceToken)
     }
 
     companion object {

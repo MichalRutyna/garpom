@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.PhoneAuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,12 +25,15 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
 
     val verificationId = MutableStateFlow<String?>(null)
 
+    var job: Job? = null
+
     fun startPhoneNumberVerification(phoneNumber: String) {
         Log.d(TAG, "Started verification")
         _uiState.value = AuthUiState.Loading
 
-        repository.startPhoneNumberVerification(phoneNumber)
+        job = repository.startPhoneNumberVerification(phoneNumber)
             .onEach { result ->
+                Log.d(TAG, "result: "+ result)
                 when (result) {
                     is PhoneVerificationStatus.CodeSent -> {
                         _uiState.value = AuthUiState.CodeSent
@@ -60,6 +64,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
     }
 
     fun signInWithPhoneCredential(credential: PhoneAuthCredential) {
+        Log.d(TAG, "Sign in started")
         viewModelScope.launch {
             val result = repository.signInWithCredential(credential)
             when (result) {
@@ -76,17 +81,9 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
         }
     }
 
-    fun resetState() {
+    fun backed() {
         _uiState.value = AuthUiState.Idle
-    }
-
-    fun signOut() {
-        repository.signOut()
-        _uiState.value = AuthUiState.Idle
-    }
-
-    fun test(): String {
-        return "Hello world"
+        job?.cancel()
     }
 }
 
