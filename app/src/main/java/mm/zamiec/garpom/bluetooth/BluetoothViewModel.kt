@@ -9,6 +9,7 @@ import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
+import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.net.MacAddress
@@ -18,15 +19,21 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import mm.zamiec.garpom.ui.screens.configure.ConfigureState
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
-class BluetoothViewModel (
-    private val app: Application
-) : AndroidViewModel(app) {
+@HiltViewModel
+class BluetoothViewModel @Inject constructor (
+    @ApplicationContext private val context: Context
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ConfigureState>(ConfigureState.Idle)
     val uiState: StateFlow<ConfigureState> = _uiState.asStateFlow()
@@ -37,7 +44,7 @@ class BluetoothViewModel (
     val executor: Executor = Executor { it.run() }
 
     val deviceManager: CompanionDeviceManager by lazy {
-        getSystemService(app, CompanionDeviceManager::class.java) as CompanionDeviceManager
+        getSystemService(context, CompanionDeviceManager::class.java) as CompanionDeviceManager
     }
 
     fun updatePermissionStatus(granted: Boolean) {
@@ -51,7 +58,7 @@ class BluetoothViewModel (
     fun pair(activity: Activity, btPermissionLauncher: ActivityResultLauncher<String>, btEnableLauncher: ActivityResultLauncher<Intent>, pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
 //        checkPermissions(btPermissionLauncher, activity)
 
-        val bluetoothManager: BluetoothManager? = getSystemService(app,BluetoothManager::class.java)
+        val bluetoothManager: BluetoothManager? = getSystemService(context,BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
             Log.w(TAG,"Bluetooth is not supported on this device")

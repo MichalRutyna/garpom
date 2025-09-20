@@ -1,11 +1,14 @@
 package mm.zamiec.garpom.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.PhoneAuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -15,12 +18,14 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
+    private val TAG = "AuthViewModel"
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState
 
     val verificationId = MutableStateFlow<String?>(null)
 
     fun startPhoneNumberVerification(phoneNumber: String) {
+        Log.d(TAG, "Started verification")
         _uiState.value = AuthUiState.Loading
 
         repository.startPhoneNumberVerification(phoneNumber)

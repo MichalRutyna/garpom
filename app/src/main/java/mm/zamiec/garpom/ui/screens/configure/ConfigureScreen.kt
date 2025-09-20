@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
@@ -34,7 +35,7 @@ val TAG = "ConfigureScreen"
 
 @Composable
 fun ConfigureScreen(
-    bluetoothViewModel: BluetoothViewModel,
+    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     onUnableToConfigure: () -> Unit,
 ) {
 

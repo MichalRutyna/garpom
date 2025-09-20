@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class FirebaseMessagingViewModel : ViewModel() {
+@HiltViewModel
+class FirebaseMessagingViewModel @Inject constructor() : ViewModel() {
 
     private val TAG = "FirebaseMessaging"
 

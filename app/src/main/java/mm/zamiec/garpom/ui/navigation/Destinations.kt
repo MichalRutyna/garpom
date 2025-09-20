@@ -3,6 +3,7 @@ package mm.zamiec.garpom.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,6 +41,14 @@ sealed interface Destination : NavKey {
         override val label = "Profile"
         override val icon = Icons.Filled.AccountCircle
         override val contentDescription = "Configure your profile"
+    }
+
+
+    @Serializable
+    data object Auth : Destination {
+        override val label = "Login"
+        override val icon = Icons.Filled.Lock
+        override val contentDescription = "Log in"
     }
 }
 

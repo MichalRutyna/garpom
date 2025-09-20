@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import mm.zamiec.garpom.firebase.FirebaseMessagingViewModel
 import mm.zamiec.garpom.permissions.NotificationPermissionViewModel
@@ -20,8 +21,8 @@ import mm.zamiec.garpom.permissions.NotificationPermissionViewModel
 
 @Composable
 fun AlarmsScreen(
-    notificationViewModel: NotificationPermissionViewModel,
-    firebaseMessagingViewModel: FirebaseMessagingViewModel,
+    notificationViewModel: NotificationPermissionViewModel = hiltViewModel(),
+    firebaseMessagingViewModel: FirebaseMessagingViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current

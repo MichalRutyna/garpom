@@ -2,6 +2,7 @@ package mm.zamiec.garpom.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
@@ -35,7 +36,7 @@ import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
-import androidx.hilt.navigation.compose.hiltViewModel
+import mm.zamiec.garpom.ui.screens.profile.AuthRouteController
 
 @AndroidEntryPoint
 class Nav3Activity : ComponentActivity() {
@@ -52,13 +53,7 @@ class Nav3Activity : ComponentActivity() {
 
 
     @Composable
-    fun NavExample(
-        notificationViewModel: NotificationPermissionViewModel = viewModel(),
-        bluetoothViewModel: BluetoothViewModel = viewModel(),
-        firebaseMessagingViewModel: FirebaseMessagingViewModel = viewModel(),
-        authViewModel: AuthViewModel = viewModel(),
-        authRepository: AuthRepository = AuthRepository(Firebase.auth),
-    ) {
+    fun NavExample() {
         val backStack = rememberNavBackStack(Destination.Home)
 
         Scaffold(
@@ -72,6 +67,7 @@ class Nav3Activity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
+//                Text(text = "backstack: " +backStack.toList())
                 NavDisplay(
                     modifier = Modifier.padding(innerPadding),
                     entryDecorators = listOf(
@@ -88,14 +84,10 @@ class Nav3Activity : ComponentActivity() {
                             }
                         }
                         entry<Destination.Alarms> {
-                            AlarmsScreen(
-                                notificationViewModel,
-                                firebaseMessagingViewModel
-                            )
+                            AlarmsScreen()
                         }
                         entry<Destination.Configure> {
                             ConfigureScreen(
-                                bluetoothViewModel,
                                 onUnableToConfigure = {
                                     backStack.clear()
                                     backStack.add(Destination.Home)
@@ -103,7 +95,15 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<Destination.Profile> {
-                            ProfileScreen()
+                            ProfileScreen(onNavigateToAuth = {
+                                backStack.add(Destination.Auth)
+                            })
+                        }
+                        entry<Destination.Auth> {
+                            AuthRouteController(onAuthSuccess = {
+                                backStack.removeLastOrNull()
+                                Log.d("Main", "AUTH SUCCESS")
+                            })
                         }
                     }
                 )
