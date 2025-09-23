@@ -1,19 +1,20 @@
-package mm.zamiec.garpom.auth
+package mm.zamiec.garpom.ui.screens.auth
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.PhoneAuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import mm.zamiec.garpom.auth.AuthRepository
+import mm.zamiec.garpom.auth.PhoneVerificationStatus
+import mm.zamiec.garpom.auth.VerificationResult
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,15 +67,16 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
     fun signInWithPhoneCredential(credential: PhoneAuthCredential) {
         Log.d(TAG, "Sign in started")
         viewModelScope.launch {
-            val result = repository.signInWithCredential(credential)
+//            val result = repository.signInWithCredential(credential)
+            val result = repository.linkWithCredential(credential)
             when (result) {
-                is PhoneVerificationResult.SignedIn -> {
+                is VerificationResult.Verified -> {
                     _uiState.value = AuthUiState.Success
                 }
-                is PhoneVerificationResult.InvalidCode -> {
-                    _uiState.value = AuthUiState.Error(result.message)
+                is VerificationResult.InvalidCredential -> {
+                    _uiState.value = AuthUiState.Error("Invalid code")
                 }
-                is PhoneVerificationResult.Error -> {
+                is VerificationResult.Error -> {
                     _uiState.value = AuthUiState.Error(result.message)
                 }
             }

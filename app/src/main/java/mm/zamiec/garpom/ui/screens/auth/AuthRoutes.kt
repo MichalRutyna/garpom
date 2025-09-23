@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.screens.profile
+package mm.zamiec.garpom.ui.screens.auth
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

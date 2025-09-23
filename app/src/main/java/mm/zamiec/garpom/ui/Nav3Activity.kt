@@ -8,15 +8,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -25,12 +22,12 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.MutableStateFlow
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
 import mm.zamiec.garpom.ui.navigation.Destination
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
-import mm.zamiec.garpom.ui.screens.profile.AuthRouteController
+import mm.zamiec.garpom.ui.screens.auth.AuthRouteController
+import mm.zamiec.garpom.ui.screens.home.HomeScreen
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
@@ -42,17 +39,18 @@ class Nav3Activity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GarPomTheme {
-                NavExample()
+                NavComponent()
             }
         }
     }
 
 
     @Composable
-    fun NavExample() {
+    fun NavComponent() {
         val backStack = rememberNavBackStack(Destination.Home)
 
-        var isInSubNavigation = remember { mutableStateOf(false) }
+        // Needed for properly handling back gesture when in sub-navdisplays
+        val isInSubNavigation = remember { mutableStateOf(false) }
 
         Scaffold(
             bottomBar = {
@@ -77,9 +75,7 @@ class Nav3Activity : ComponentActivity() {
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
                         entry<Destination.Home> {
-                            Column {
-                                Text("Home")
-                            }
+                            HomeScreen()
                         }
                         entry<Destination.Alarms> {
                             AlarmsScreen()

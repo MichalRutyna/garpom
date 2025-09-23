@@ -21,7 +21,7 @@
         <activity
             android:name=".ui.Nav3Activity"
             android:exported="true"
-            android:label="Nav3Activity" >
+            android:label="GarPom" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

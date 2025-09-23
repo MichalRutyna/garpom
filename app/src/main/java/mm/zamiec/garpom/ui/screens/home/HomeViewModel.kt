@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.screens.profile
+package mm.zamiec.garpom.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,14 +8,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
-    private val TAG = "ProfileViewModel"
+    private val TAG = "HomeViewModel"
 
 
     val currentUser get() = repository.currentUser
-    // TODO custom user class and everything
 
     fun test() {
         repository.test()
     }
 }
-

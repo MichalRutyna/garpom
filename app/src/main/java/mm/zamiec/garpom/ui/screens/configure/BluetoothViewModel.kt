@@ -1,8 +1,7 @@
-package mm.zamiec.garpom.bluetooth
+package mm.zamiec.garpom.ui.screens.configure
 
 import android.Manifest
 import android.app.Activity
-import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.companion.AssociationInfo
@@ -17,16 +16,13 @@ import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.RequiresPermission
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.AndroidViewModel
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.ui.screens.configure.ConfigureState
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -44,7 +40,10 @@ class BluetoothViewModel @Inject constructor (
     val executor: Executor = Executor { it.run() }
 
     val deviceManager: CompanionDeviceManager by lazy {
-        getSystemService(context, CompanionDeviceManager::class.java) as CompanionDeviceManager
+        ContextCompat.getSystemService(
+            context,
+            CompanionDeviceManager::class.java
+        ) as CompanionDeviceManager
     }
 
     fun updatePermissionStatus(granted: Boolean) {
@@ -56,9 +55,9 @@ class BluetoothViewModel @Inject constructor (
     }
 
     fun pair(activity: Activity, btPermissionLauncher: ActivityResultLauncher<String>, btEnableLauncher: ActivityResultLauncher<Intent>, pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
-//        checkPermissions(btPermissionLauncher, activity)
 
-        val bluetoothManager: BluetoothManager? = getSystemService(context,BluetoothManager::class.java)
+        val bluetoothManager: BluetoothManager? =
+            ContextCompat.getSystemService(context, BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
             Log.w(TAG,"Bluetooth is not supported on this device")
@@ -67,17 +66,9 @@ class BluetoothViewModel @Inject constructor (
         }
 
         if (!_bluetoothPermissionGranted.value) {
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(
-//                    activity, Manifest.permission.BLUETOOTH_CONNECT)
-//            ){
-//                _uiState.value = ConfigureState.PermissionDialog
-//                // connectBluetooth() from dialog
-//            }
-//            else {
-                btPermissionLauncher.launch(
-                    Manifest.permission.BLUETOOTH_CONNECT)
-                // connectBluetooth() from callback
-//            }
+            btPermissionLauncher.launch(
+                Manifest.permission.BLUETOOTH_CONNECT)
+            // connectBluetooth() from callback
             return
         }
 
@@ -146,4 +137,3 @@ class BluetoothViewModel @Inject constructor (
         _uiState.value = ConfigureState.Idle
     }
 }
-

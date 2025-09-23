@@ -1,16 +1,18 @@
 package mm.zamiec.garpom.auth
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.auth
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,13 +21,23 @@ import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@ActivityRetainedScoped
 class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth) {
-
-    val executor: Executor = Executor { it.run() }
 
     val TAG = "AuthRepository"
 
-    fun signOut() = firebaseAuth.signOut()
+    val executor: Executor = Executor { it.run() }
+
+    init {
+        if (currentUser == null) {
+            signInAnonymously()
+        }
+    }
+
+    fun signOut() = {
+        firebaseAuth.signOut()
+        signInAnonymously()
+    }
 
     val currentUser get() = firebaseAuth.currentUser
 
@@ -87,14 +99,42 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         return PhoneAuthProvider.getCredential(verificationId, code)
     }
 
-    suspend fun signInWithCredential(credential: AuthCredential): PhoneVerificationResult {
+    suspend fun linkWithCredential(credential: AuthCredential): VerificationResult {
+        if (currentUser == null) {
+            Log.e(TAG, "Link called when no account was set")
+            return VerificationResult.Error("Fatal error")
+        }
+        return try {
+            currentUser!!.linkWithCredential(credential).await()
+            Log.d(TAG, "Linked account successfully")
+            VerificationResult.Verified
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.w(TAG, "Malformed or invalid credential")
+            VerificationResult.InvalidCredential
+        } catch (e: FirebaseAuthUserCollisionException) {
+            val msg = "There is already another account associated with these credentials"
+            Log.w(TAG, msg)
+            // TODO check correctness?
+            signInWithCredential(credential)
+//            VerificationResult.Error(msg)
+        } catch (e: FirebaseAuthInvalidUserException) {
+            Log.e(TAG, "Anonymous account invalid")
+            signInWithCredential(credential)
+//            VerificationResult.Error("This account is invalid")
+        } catch (e: FirebaseAuthException) {
+            Log.e(TAG, "Attempt to link a provider that is already linked to this account or internal auth error")
+            VerificationResult.Error("Internal server error")
+        }
+    }
+
+    suspend fun signInWithCredential(credential: AuthCredential): VerificationResult {
         return try {
             firebaseAuth.signInWithCredential(credential).await()
-            PhoneVerificationResult.SignedIn("Sign in successfull")
+            VerificationResult.Verified
         } catch (e: FirebaseAuthInvalidCredentialsException) {
-            PhoneVerificationResult.InvalidCode("Code entered was invalid")
+            VerificationResult.InvalidCredential
         } catch (e: Exception) {
-            PhoneVerificationResult.Error(e.message ?: "Unknown error")
+            VerificationResult.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -116,10 +156,10 @@ sealed class PhoneVerificationStatus {
 
 }
 
-sealed class PhoneVerificationResult {
-    data class SignedIn(val message: String) : PhoneVerificationResult()
+sealed class VerificationResult {
+    data object Verified : VerificationResult()
 
-    data class InvalidCode(val message: String) : PhoneVerificationResult()
+    data object InvalidCredential : VerificationResult()
 
-    data class Error(val message: String) : PhoneVerificationResult()
+    data class Error(val message: String) : VerificationResult()
 }

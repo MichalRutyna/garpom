@@ -28,7 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
-import mm.zamiec.garpom.bluetooth.BluetoothViewModel
+import mm.zamiec.garpom.ui.screens.configure.BluetoothViewModel
 import mm.zamiec.garpom.ui.screens.configure.ConfigureState
 
 val TAG = "ConfigureScreen"

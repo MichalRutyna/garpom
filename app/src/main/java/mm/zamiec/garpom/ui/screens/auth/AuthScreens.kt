@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.screens.profile
+package mm.zamiec.garpom.ui.screens.auth
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,19 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleStartEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kotlinx.coroutines.launch
-import mm.zamiec.garpom.auth.AuthUiState
-import mm.zamiec.garpom.auth.AuthViewModel
 
 
 @Composable

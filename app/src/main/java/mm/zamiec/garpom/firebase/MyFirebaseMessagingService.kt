@@ -8,14 +8,17 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.collections.isNotEmpty
 import kotlin.let
 
+@AndroidEntryPoint
+class MyFirebaseMessagingService : FirebaseMessagingService() {
 
-class MyFirebaseMessagingService @Inject constructor(
-    var auth: FirebaseAuth,
-) : FirebaseMessagingService() {
+    @Inject
+    lateinit var auth: FirebaseAuth
+
     override fun onNewToken(token: String) {
         Log.d(TAG, "Refreshed token: $token")
 
@@ -55,6 +58,7 @@ class MyFirebaseMessagingService @Inject constructor(
             Log.e(TAG, "Send token called, but no user in auth")
             return
         }
+        // TODO crash
         val userId = auth.currentUser!!.uid
         Firebase.firestore.collection("fcmTokens").document(userId)
             .set(deviceToken)
