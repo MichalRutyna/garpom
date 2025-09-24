@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
@@ -15,8 +16,12 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import mm.zamiec.garpom.model.AppUser
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -28,32 +33,45 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
 
     val executor: Executor = Executor { it.run() }
 
-    init {
-        if (currentUser == null) {
-            signInAnonymously()
+    val userExists: Boolean
+        get() = firebaseAuth.currentUser != null
+
+    val currentUser: Flow<AppUser>
+        get() = callbackFlow {
+            val listener =
+                FirebaseAuth.AuthStateListener { auth ->
+                    Log.d(TAG, "Auth state changed: " + auth.uid)
+                    this.trySend(auth.currentUser?.let {
+                        AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
+
+                    } ?: AppUser())
+                }
+            firebaseAuth.addAuthStateListener(listener)
+            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
         }
-    }
-
-    fun signOut() = {
-        firebaseAuth.signOut()
-        signInAnonymously()
-    }
-
-    val currentUser get() = firebaseAuth.currentUser
-
-    val isAnonymous get() = currentUser!!.isAnonymous
 
     fun signInAnonymously() {
         firebaseAuth.signInAnonymously()
             .addOnCompleteListener(executor) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInAnonymously:success")
                 } else {
-                    // If sign in fails, display a message to the user.
                     Log.e(TAG, "signInAnonymously:failure", task.exception)
                 }
             }
+    }
+
+    init {
+        Log.i(TAG, "Initialized")
+        if (!userExists) {
+            signInAnonymously()
+        }
+    }
+
+    fun signOut() {
+        Log.d(TAG, "Signing out")
+        firebaseAuth.signOut()
+        signInAnonymously()
     }
 
     fun startPhoneNumberVerification(
@@ -100,12 +118,12 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
     }
 
     suspend fun linkWithCredential(credential: AuthCredential): VerificationResult {
-        if (currentUser == null) {
+        if (firebaseAuth.currentUser == null) {
             Log.e(TAG, "Link called when no account was set")
             return VerificationResult.Error("Fatal error")
         }
         return try {
-            currentUser!!.linkWithCredential(credential).await()
+            firebaseAuth.currentUser!!.linkWithCredential(credential).await()
             Log.d(TAG, "Linked account successfully")
             VerificationResult.Verified
         } catch (e: FirebaseAuthInvalidCredentialsException) {
@@ -124,6 +142,9 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         } catch (e: FirebaseAuthException) {
             Log.e(TAG, "Attempt to link a provider that is already linked to this account or internal auth error")
             VerificationResult.Error("Internal server error")
+        } catch (e: Exception) {
+            Log.e(TAG, "Other fatal error: " + e.message)
+            VerificationResult.Error("Internal error")
         }
     }
 
@@ -136,13 +157,6 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         } catch (e: Exception) {
             VerificationResult.Error(e.message ?: "Unknown error")
         }
-    }
-
-    fun test(){
-        val req = UserProfileChangeRequest.Builder()
-            .setDisplayName("Test")
-            .build()
-        currentUser?.updateProfile(req)
     }
 }
 

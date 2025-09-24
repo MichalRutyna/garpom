@@ -2,6 +2,7 @@ package mm.zamiec.garpom.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import mm.zamiec.garpom.auth.AuthRepository
 import javax.inject.Inject
 
@@ -11,9 +12,5 @@ class ProfileViewModel @Inject constructor(private val repository: AuthRepositor
     private val TAG = "HomeViewModel"
 
 
-    val currentUser get() = repository.currentUser
 
-    fun test() {
-        repository.test()
-    }
 }
