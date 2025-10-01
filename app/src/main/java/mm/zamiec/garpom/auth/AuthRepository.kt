@@ -40,7 +40,6 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         get() = callbackFlow {
             val listener =
                 FirebaseAuth.AuthStateListener { auth ->
-                    Log.d(TAG, "Auth state changed: " + auth.uid)
                     this.trySend(auth.currentUser?.let {
                         AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
 

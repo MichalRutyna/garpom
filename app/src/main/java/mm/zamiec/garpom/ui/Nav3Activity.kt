@@ -23,12 +23,15 @@ import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
-import mm.zamiec.garpom.ui.navigation.Destination
+import mm.zamiec.garpom.ui.navigation.Auth
+import mm.zamiec.garpom.ui.navigation.BottomNavDestination
+import mm.zamiec.garpom.ui.navigation.Station
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
 import mm.zamiec.garpom.ui.screens.auth.AuthRouteController
 import mm.zamiec.garpom.ui.screens.home.HomeScreen
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
+import mm.zamiec.garpom.ui.screens.station.StationScreen
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @AndroidEntryPoint
@@ -47,7 +50,7 @@ class Nav3Activity : ComponentActivity() {
 
     @Composable
     fun NavComponent() {
-        val backStack = rememberNavBackStack(Destination.Home)
+        val backStack = rememberNavBackStack(BottomNavDestination.Home)
 
         // Needed for properly handling back gesture when in sub-navdisplays
         val isInSubNavigation = remember { mutableStateOf(false) }
@@ -55,7 +58,7 @@ class Nav3Activity : ComponentActivity() {
         Scaffold(
             bottomBar = {
                 AppNavigationBar(
-                    backStack.lastOrNull() as? Destination,
+                    backStack.lastOrNull() as? BottomNavDestination,
                     onClick = { screen ->
                         backStack.clear()
                         backStack.add(screen)
@@ -74,31 +77,38 @@ class Nav3Activity : ComponentActivity() {
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
-                        entry<Destination.Home> {
-                            HomeScreen()
-                        }
-                        entry<Destination.Alarms> {
-                            AlarmsScreen()
-                        }
-                        entry<Destination.Configure> {
-                            ConfigureScreen(
-                                onUnableToConfigure = {
-                                    backStack.clear()
-                                    backStack.add(Destination.Home)
+                        entry<BottomNavDestination.Home> {
+                            HomeScreen(
+                                onNavigateToStationScreen = { stationId ->
+                                    backStack.add(Station(stationId))
                                 }
                             )
                         }
-                        entry<Destination.Profile> {
+                        entry<BottomNavDestination.Alarms> {
+                            AlarmsScreen()
+                        }
+                        entry<BottomNavDestination.Configure> {
+                            ConfigureScreen(
+                                onUnableToConfigure = {
+                                    backStack.clear()
+                                    backStack.add(BottomNavDestination.Home)
+                                }
+                            )
+                        }
+                        entry<BottomNavDestination.Profile> {
                             ProfileScreen(onNavigateToAuth = {
-                                backStack.add(Destination.Auth)
+                                backStack.add(Auth)
                             })
                         }
-                        entry<Destination.Auth> {
+                        entry<Auth> {
                             AuthRouteController(onAuthSuccess = {
                                 backStack.removeLastOrNull()
                                 Log.d("Main", "AUTH SUCCESS")
                             },
                             isInSubNavigation = isInSubNavigation)
+                        }
+                        entry<Station> { key ->
+                            StationScreen(stationId = key.id)
                         }
                     },
                     predictivePopTransitionSpec =

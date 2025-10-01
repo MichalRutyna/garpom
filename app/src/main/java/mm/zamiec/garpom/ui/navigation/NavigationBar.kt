@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun AppNavigationBar(
-    selectedScreen : Destination?,
-    onClick: (Destination) -> Unit
+    selectedScreen : BottomNavDestination?,
+    onClick: (BottomNavDestination) -> Unit
 ) {
     NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
         bottomNavItems.forEach { screen ->
