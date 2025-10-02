@@ -1,6 +1,7 @@
-package mm.zamiec.garpom.auth
+package mm.zamiec.garpom.controller.auth
 
 import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -8,26 +9,32 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
+import com.google.firebase.messaging.messaging
 import dagger.hilt.android.scopes.ActivityRetainedScoped
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import mm.zamiec.garpom.controller.TokenServerInteractor
 import mm.zamiec.garpom.model.AppUser
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth) {
+class AuthRepository @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
+    private val serverInteractor: TokenServerInteractor
+) {
 
     val TAG = "AuthRepository"
 
@@ -54,6 +61,7 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
             .addOnCompleteListener(executor) { task ->
                 if (task.isSuccessful) {
                     Log.d(TAG, "signInAnonymously:success")
+                    serverInteractor.ensureToken()
                 } else {
                     Log.e(TAG, "signInAnonymously:failure", task.exception)
                 }
@@ -65,6 +73,7 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         if (!userExists) {
             signInAnonymously()
         }
+        serverInteractor.ensureToken()
     }
 
     fun signOut() {
@@ -124,14 +133,14 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
         return try {
             firebaseAuth.currentUser!!.linkWithCredential(credential).await()
             Log.d(TAG, "Linked account successfully")
+            serverInteractor.ensureToken()
             VerificationResult.Verified
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             Log.w(TAG, "Malformed or invalid credential")
             VerificationResult.InvalidCredential
         } catch (e: FirebaseAuthUserCollisionException) {
-            val msg = "There is already another account associated with these credentials"
+            val msg = "There is already another account associated with these credentials, logging into it"
             Log.w(TAG, msg)
-            // TODO check correctness?
             signInWithCredential(credential)
 //            VerificationResult.Error(msg)
         } catch (e: FirebaseAuthInvalidUserException) {
@@ -148,8 +157,11 @@ class AuthRepository @Inject constructor(private val firebaseAuth: FirebaseAuth)
     }
 
     suspend fun signInWithCredential(credential: AuthCredential): VerificationResult {
+        Log.d(TAG, "Signing in with credentials")
         return try {
             firebaseAuth.signInWithCredential(credential).await()
+            Log.d(TAG, "Verification successful")
+            serverInteractor.ensureToken()
             VerificationResult.Verified
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             VerificationResult.InvalidCredential

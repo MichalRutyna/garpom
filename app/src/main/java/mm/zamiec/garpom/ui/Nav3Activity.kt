@@ -45,6 +45,7 @@ class Nav3Activity : ComponentActivity() {
                 NavComponent()
             }
         }
+
     }
 
 

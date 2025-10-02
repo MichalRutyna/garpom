@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import mm.zamiec.garpom.auth.AuthRepository
-import mm.zamiec.garpom.auth.PhoneVerificationStatus
-import mm.zamiec.garpom.auth.VerificationResult
+import mm.zamiec.garpom.controller.auth.AuthRepository
+import mm.zamiec.garpom.controller.auth.PhoneVerificationStatus
+import mm.zamiec.garpom.controller.auth.VerificationResult
 import javax.inject.Inject
 
 @HiltViewModel

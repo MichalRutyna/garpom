@@ -3,8 +3,7 @@ package mm.zamiec.garpom.ui.screens.home
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
-import mm.zamiec.garpom.auth.AuthRepository
-import mm.zamiec.garpom.ui.screens.profile.ProfileState
+import mm.zamiec.garpom.controller.auth.AuthRepository
 import javax.inject.Inject
 
 @HiltViewModel

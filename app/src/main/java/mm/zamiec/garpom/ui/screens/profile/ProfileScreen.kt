@@ -1,6 +1,8 @@
 package mm.zamiec.garpom.ui.screens.profile
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -8,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -18,26 +22,35 @@ fun ProfileScreen(
 ) {
     val uiState: ProfileState by profileViewModel.uiState.collectAsState(ProfileState())
 
-    Column {
-        Text("Profile")
+    Column (
+        Modifier.padding(10.dp)
+    ) {
         if (uiState.isAnonymous) {
-            Text("Welcome!", style= MaterialTheme.typography.headlineLarge)
-
-            Button(onClick = {
-                onNavigateToAuth()
-            }) {
-                Text("Log in")
+            Row {
+                Text("Anonymous",
+                    style=MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(onClick = {
+                    onNavigateToAuth()
+                }) {
+                    Text("Log in")
+                }
             }
         } else {
-            Text("Welcome, ${uiState.username}", style= MaterialTheme.typography.headlineLarge)
-
-            Button(onClick = {
-                profileViewModel.logOut()
-            }) {
-                Text("Log out")
+            Row {
+                Text(uiState.username,
+                    style=MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(onClick = {
+                    profileViewModel.logOut()
+                }) {
+                    Text("Log out")
+                }
             }
         }
 
-
+        Text("User id: ${uiState.userId}")
     }
 }

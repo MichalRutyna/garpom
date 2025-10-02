@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.firebase
+package mm.zamiec.garpom.controller.firebase
 
 import android.app.Activity
 import android.util.Log
