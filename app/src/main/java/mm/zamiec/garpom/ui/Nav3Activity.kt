@@ -22,14 +22,18 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.runtime.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dagger.hilt.android.AndroidEntryPoint
+import mm.zamiec.garpom.ui.navigation.AlarmConfig
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
 import mm.zamiec.garpom.ui.navigation.Auth
 import mm.zamiec.garpom.ui.navigation.BottomNavDestination
+import mm.zamiec.garpom.ui.navigation.Measurement
 import mm.zamiec.garpom.ui.navigation.Station
+import mm.zamiec.garpom.ui.navigation.StationConfig
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
 import mm.zamiec.garpom.ui.screens.auth.AuthRouteController
 import mm.zamiec.garpom.ui.screens.home.HomeScreen
+import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreen
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.screens.station.StationScreen
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
@@ -80,13 +84,19 @@ class Nav3Activity : ComponentActivity() {
                     entryProvider = entryProvider {
                         entry<BottomNavDestination.Home> {
                             HomeScreen(
-                                onNavigateToStationScreen = { stationId ->
+                                onStationSummaryClicked = { stationId ->
                                     backStack.add(Station(stationId))
+                                },
+                                onRecentAlarmOccurrenceClicked = { measurementId ->
+                                    backStack.add(Measurement(measurementId))
                                 }
                             )
                         }
                         entry<BottomNavDestination.Alarms> {
                             AlarmsScreen()
+                        }
+                        entry<AlarmConfig> { key ->
+                            StationScreen(stationId = key.id)
                         }
                         entry<BottomNavDestination.Configure> {
                             ConfigureScreen(
@@ -95,6 +105,9 @@ class Nav3Activity : ComponentActivity() {
                                     backStack.add(BottomNavDestination.Home)
                                 }
                             )
+                        }
+                        entry<StationConfig> { key ->
+                            StationScreen(stationId = key.id)
                         }
                         entry<BottomNavDestination.Profile> {
                             ProfileScreen(onNavigateToAuth = {
@@ -110,6 +123,9 @@ class Nav3Activity : ComponentActivity() {
                         }
                         entry<Station> { key ->
                             StationScreen(stationId = key.id)
+                        }
+                        entry<Measurement> { key ->
+                            MeasurementScreen(measurementId = key.id)
                         }
                     },
                     predictivePopTransitionSpec =

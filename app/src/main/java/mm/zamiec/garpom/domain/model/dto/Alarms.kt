@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 data class AlarmOccurrenceDto (
     val id: String,
     val alarmId: String,
+    val conditionId: String,
     val measurementId: String,
     val stationId: String,
     val userId: String,
@@ -16,7 +17,7 @@ data class AlarmOccurrenceDto (
 data class AlarmConditionDto (
     val id: String,
     val parameter: String,
-    val triggerLevel: Float,
+    val triggerLevel: Double,
     val triggerOnHigher: Boolean
 )
 

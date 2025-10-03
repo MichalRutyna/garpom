@@ -54,6 +54,22 @@ data class Station(
 ) : NavKey
 
 
+@Serializable
+data class Measurement(
+    val id: String
+) : NavKey
+
+
+@Serializable
+data class AlarmConfig(
+    val id: String
+) : NavKey
+
+@Serializable
+data class StationConfig(
+    val id: String
+) : NavKey
+
 
 val bottomNavItems = listOf(
     BottomNavDestination.Home,

@@ -19,8 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
@@ -28,8 +26,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
-import mm.zamiec.garpom.ui.screens.configure.BluetoothViewModel
-import mm.zamiec.garpom.ui.screens.configure.ConfigureState
+import mm.zamiec.garpom.domain.model.state.ConfigureScreenState
 
 val TAG = "ConfigureScreen"
 
@@ -95,7 +92,7 @@ fun ConfigureScreen(
         onPauseOrDispose {  }
     }
 
-    if (configureState.value == ConfigureState.PermissionDialog) {
+    if (configureState.value == ConfigureScreenState.PermissionDialog) {
         BluetoothExplanationDialog(
             onDismiss = {
                 bluetoothViewModel.alertPermissionRejected()
@@ -105,21 +102,21 @@ fun ConfigureScreen(
             })
     }
 
-    if (configureState.value == ConfigureState.BluetoothRejected) {
+    if (configureState.value == ConfigureScreenState.BluetoothRejected) {
         BluetoothRejectedDialog(onConfirmed = {
             onUnableToConfigure()
             bluetoothViewModel.clearDialog()
         })
     }
 
-    if (configureState.value == ConfigureState.DeviceIncompatible) {
+    if (configureState.value == ConfigureScreenState.DeviceIncompatible) {
         DeviceIncompatibleDialog(onConfirmed = {
             onUnableToConfigure()
             bluetoothViewModel.clearDialog()
         })
     }
 
-    if (configureState.value == ConfigureState.PermissionConfirmed) {
+    if (configureState.value == ConfigureScreenState.PermissionConfirmed) {
         bluetoothViewModel.connectBluetooth(pairingLauncher)
         bluetoothViewModel.alertPairingLaunched()
     }

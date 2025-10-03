@@ -27,24 +27,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.domain.model.HomeState
-import mm.zamiec.garpom.domain.model.StationSummary
+import mm.zamiec.garpom.domain.model.state.HomeState
+import mm.zamiec.garpom.domain.model.state.StationSummary
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToStationScreen: (String) -> Unit
+    onStationSummaryClicked: (String) -> Unit,
+    onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
     val uiState: HomeState by homeViewModel.uiState.collectAsState(HomeState())
 
-    HomeScreenContent(uiState, onNavigateToStationScreen)
+    HomeScreenContent(uiState, onStationSummaryClicked, onRecentAlarmOccurrenceClicked)
 }
 
 @Composable
 private fun HomeScreenContent(
     uiState: HomeState,
-    onNavigateToStationScreen: (String) -> Unit
+    onStationSummaryClicked: (String) -> Unit,
+    onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
     Column {
         val text =
@@ -66,7 +68,7 @@ private fun HomeScreenContent(
             items(uiState.stations) { station ->
                 Row (
                     Modifier.padding(10.dp).clickable(onClick = {
-                        onNavigateToStationScreen(station.stationId)
+                        onStationSummaryClicked(station.stationId)
                     }),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -109,7 +111,7 @@ private fun HomeScreenContent(
             items(uiState.recentAlarms) { alarm ->
                 Row (
                     Modifier.padding(10.dp).clickable(onClick = {
-                        // TODO
+                        onRecentAlarmOccurrenceClicked(alarm.measurementId)
                     }),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -147,6 +149,6 @@ fun Preview() {
         )
     )
     GarPomTheme {
-        HomeScreenContent(uiState, {})
+        HomeScreenContent(uiState, {}, {})
     }
 }

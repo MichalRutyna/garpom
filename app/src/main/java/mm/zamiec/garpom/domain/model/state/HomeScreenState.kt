@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.domain.model
+package mm.zamiec.garpom.domain.model.state
 
 data class StationSummary(
     val stationId: String = "",
