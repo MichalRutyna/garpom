@@ -1,27 +1,17 @@
 package mm.zamiec.garpom.controller.firebase
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.firestore
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.google.firebase.messaging.messaging
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import mm.zamiec.garpom.controller.TokenServerInteractor
+import mm.zamiec.garpom.domain.usecase.TokenUseCase
 import javax.inject.Inject
 import kotlin.collections.isNotEmpty
 import kotlin.let
 
 @AndroidEntryPoint
-class MyFirebaseMessagingService @Inject constructor(private val serverInteractor: TokenServerInteractor)
+class MyFirebaseMessagingService @Inject constructor(private val serverInteractor: TokenUseCase)
     : FirebaseMessagingService() {
 
     private val TAG = "MyFirebaseMsgService"

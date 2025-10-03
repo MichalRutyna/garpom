@@ -1,11 +1,9 @@
-package mm.zamiec.garpom.permissions
+package mm.zamiec.garpom.domain.usecase
 
 import android.Manifest
-import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

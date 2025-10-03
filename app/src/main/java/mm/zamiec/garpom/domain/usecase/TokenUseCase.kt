@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.controller
+package mm.zamiec.garpom.domain.usecase
 
 import android.util.Log
 import com.google.firebase.Firebase
@@ -14,9 +14,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-
 @ActivityRetainedScoped
-class TokenServerInteractor @Inject constructor(private val firebaseAuth: FirebaseAuth) {
+class TokenUseCase @Inject constructor(private val firebaseAuth: FirebaseAuth) {
     private val TAG = "TokenServerInteractor"
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     fun sendRegistrationToServer(token: String?) {

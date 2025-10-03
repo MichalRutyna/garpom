@@ -10,12 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
 import mm.zamiec.garpom.controller.auth.AuthRepository
-import mm.zamiec.garpom.model.AppUser
-import mm.zamiec.garpom.ui.screens.home.StationSummary
-import javax.inject.Inject
-import kotlin.collections.orEmpty
 
 @HiltViewModel(assistedFactory = StationViewModel.Factory::class)
 class StationViewModel @AssistedInject constructor(

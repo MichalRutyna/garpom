@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.model.module
+package mm.zamiec.garpom.domain.module
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth

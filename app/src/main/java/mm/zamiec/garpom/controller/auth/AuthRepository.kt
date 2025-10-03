@@ -1,7 +1,6 @@
 package mm.zamiec.garpom.controller.auth
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -12,20 +11,20 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.firestore
-import com.google.firebase.messaging.messaging
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.tasks.await
-import mm.zamiec.garpom.controller.TokenServerInteractor
-import mm.zamiec.garpom.model.AppUser
+import mm.zamiec.garpom.domain.usecase.TokenUseCase
+import mm.zamiec.garpom.domain.model.AppUser
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -33,7 +32,7 @@ import javax.inject.Inject
 @ActivityRetainedScoped
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val serverInteractor: TokenServerInteractor
+    private val serverInteractor: TokenUseCase
 ) {
 
     val TAG = "AuthRepository"
@@ -43,18 +42,35 @@ class AuthRepository @Inject constructor(
     val userExists: Boolean
         get() = firebaseAuth.currentUser != null
 
-    val currentUser: Flow<AppUser>
-        get() = callbackFlow {
-            val listener =
-                FirebaseAuth.AuthStateListener { auth ->
-                    this.trySend(auth.currentUser?.let {
-                        AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
-
-                    } ?: AppUser())
-                }
-            firebaseAuth.addAuthStateListener(listener)
-            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
+    val currentUser: StateFlow<AppUser> = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            trySend(
+                auth.currentUser?.let {
+                    AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
+                } ?: AppUser()
+            )
         }
+        firebaseAuth.addAuthStateListener(listener)
+        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
+    }.stateIn(
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+        started = SharingStarted.Eagerly,
+        initialValue = AppUser()
+    )
+
+//    val currentUser: Flow<AppUser>
+//        get() = callbackFlow {
+//            val listener =
+//                FirebaseAuth.AuthStateListener { auth ->
+//                    Log.d(TAG, "Called get")
+//                    this.trySend(auth.currentUser?.let {
+//                        AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
+//
+//                    } ?: AppUser())
+//                }
+//            firebaseAuth.addAuthStateListener(listener)
+//            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
+//        }
 
     fun signInAnonymously() {
         firebaseAuth.signInAnonymously()

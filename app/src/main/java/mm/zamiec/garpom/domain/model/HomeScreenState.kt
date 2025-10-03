@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.screens.home
+package mm.zamiec.garpom.domain.model
 
 data class StationSummary(
     val stationId: String = "",
@@ -8,8 +8,14 @@ data class StationSummary(
 
 )
 
+data class RecentAlarm(
+    val alarmName: String = "",
+    val measurementId: String = ""
+)
+
 data class HomeState(
     val isAnonymous: Boolean = true,
     val username: String = "",
-    val stations: List<StationSummary> = listOf()
+    val stations: List<StationSummary> = listOf(),
+    val recentAlarms: List<RecentAlarm> = listOf(),
 )

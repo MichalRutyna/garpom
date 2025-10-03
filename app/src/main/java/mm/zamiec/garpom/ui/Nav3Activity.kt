@@ -67,7 +67,7 @@ class Nav3Activity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-                Text(text = "backstack: " +backStack.toList())
+//                Text(text = "backstack: " +backStack.toList())
                 NavDisplay(
                     modifier = Modifier.padding(innerPadding),
                     entryDecorators = listOf(
