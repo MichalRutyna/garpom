@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.domain.usecase
+package mm.zamiec.garpom.domain
 
 import android.Manifest
 import android.content.Context

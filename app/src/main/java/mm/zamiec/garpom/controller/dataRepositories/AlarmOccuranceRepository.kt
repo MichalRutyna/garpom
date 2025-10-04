@@ -6,6 +6,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import mm.zamiec.garpom.controller.firebase.documentAsFlow
+import mm.zamiec.garpom.controller.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.controller.firebase.queryAsFlow
 import mm.zamiec.garpom.domain.model.dto.AlarmDto
 import mm.zamiec.garpom.domain.model.dto.AlarmOccurrenceDto
@@ -44,8 +45,10 @@ class AlarmOccuranceRepository @Inject constructor() {
             db.collection("alarm_occurrences")
                 .whereEqualTo("user_id", userId)
                 .orderBy("date", Query.Direction.DESCENDING)
-                .limit(5)
-        ) {doc ->
-            mapper(doc)
-        }
+                .limit(5),
+            ::mapper
+        )
+
+    fun getOccurrencesForMeasurement(measurementId: String): Flow<List<AlarmOccurrenceDto>> =
+        db.filteredCollectionAsFlow("alarm_occurrences", "measurement_id", measurementId, ::mapper)
 }

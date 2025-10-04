@@ -4,11 +4,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
-import mm.zamiec.garpom.controller.firebase.collectionAsFlow
+import mm.zamiec.garpom.controller.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.controller.firebase.collectionByIdsAsFlow
 import mm.zamiec.garpom.controller.firebase.documentAsFlow
 import mm.zamiec.garpom.domain.model.dto.AlarmDto
-import mm.zamiec.garpom.domain.model.dto.MeasurementDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,18 +30,12 @@ class AlarmRepository @Inject constructor() {
     }
 
     fun getAlarmById(id: String): Flow<AlarmDto?> =
-        db.documentAsFlow("alarms", id) {doc ->
-            mapper(doc)
-        }
+        db.documentAsFlow("alarms", id, ::mapper)
 
     fun getAlarmListByIdList(ids: List<String>): Flow<List<AlarmDto>> =
-        db.collectionByIdsAsFlow("alarms", ids) { doc ->
-            mapper(doc)
-        }
+        db.collectionByIdsAsFlow("alarms", ids, ::mapper)
 
     fun getAlarmByStation(stationId: String): Flow<List<AlarmDto>> =
-        db.collectionAsFlow("alarms", "station_id", stationId) { doc ->
-            mapper(doc)
-        }
+        db.filteredCollectionAsFlow("alarms", "station_id", stationId, ::mapper)
 
 }

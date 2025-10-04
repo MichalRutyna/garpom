@@ -2,11 +2,16 @@ package mm.zamiec.garpom.ui.screens.measurement
 
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import mm.zamiec.garpom.controller.auth.AuthRepository
 import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
 import mm.zamiec.garpom.domain.usecase.MeasurementDetailsUseCase
@@ -20,8 +25,20 @@ class MeasurementScreenViewModel @AssistedInject constructor(
 
     private val TAG = "MeasurementScreenViewModel"
 
-    val uiState: Flow<MeasurementScreenState> =
-        measurementDetailsUseCase.measurementDetails(measurementId)
+    private val _uiState = MutableStateFlow<MeasurementScreenState>(MeasurementScreenState.Loading)
+    val uiState: StateFlow<MeasurementScreenState> = _uiState.asStateFlow()
+
+    init {
+        loadMeasurement()
+    }
+
+    private fun loadMeasurement() {
+        viewModelScope.launch {
+            _uiState.value = MeasurementScreenState.Loading
+            val snapshot = measurementDetailsUseCase.measurementDetailsSnapshot(measurementId)
+            _uiState.value = snapshot
+        }
+    }
 
     @AssistedFactory
     interface Factory {

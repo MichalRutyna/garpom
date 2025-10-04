@@ -17,7 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import mm.zamiec.garpom.controller.firebase.FirebaseMessagingViewModel
 import mm.zamiec.garpom.controller.firebase.MyFirebaseMessagingService
-import mm.zamiec.garpom.domain.usecase.NotificationPermissionViewModel
+import mm.zamiec.garpom.domain.NotificationPermissionViewModel
 
 
 @Composable

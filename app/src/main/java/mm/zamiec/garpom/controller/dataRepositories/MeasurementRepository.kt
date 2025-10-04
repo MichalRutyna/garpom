@@ -4,7 +4,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
-import mm.zamiec.garpom.controller.firebase.collectionAsFlow
+import mm.zamiec.garpom.controller.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.controller.firebase.documentAsFlow
 import mm.zamiec.garpom.domain.model.dto.MeasurementDto
 import javax.inject.Inject
@@ -32,12 +32,8 @@ class MeasurementRepository @Inject constructor() {
     }
 
     fun getMeasurementById(id: String): Flow<MeasurementDto?> =
-        db.documentAsFlow("measurements", id) {doc ->
-            mapper(doc)
-        }
+        db.documentAsFlow("measurements", id, ::mapper)
 
     fun getMeasurementsByOwner(ownerId: String): Flow<List<MeasurementDto>> =
-        db.collectionAsFlow("measurements", "owner_id", ownerId) { doc ->
-            mapper(doc)
-        }
+        db.filteredCollectionAsFlow("measurements", "owner_id", ownerId, ::mapper)
 }

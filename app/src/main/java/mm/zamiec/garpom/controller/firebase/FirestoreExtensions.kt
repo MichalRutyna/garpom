@@ -51,7 +51,7 @@ fun <T> FirebaseFirestore.documentAsFlow(
     awaitClose { listener.remove() }
 }
 
-fun <T> FirebaseFirestore.collectionAsFlow(
+fun <T> FirebaseFirestore.filteredCollectionAsFlow(
     collectionPath: String,
     field: String,
     value: Any,
