@@ -1,86 +1,90 @@
 package mm.zamiec.garpom.ui.screens.alarms
 
-import android.content.Intent
-import android.provider.Settings
-import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import mm.zamiec.garpom.controller.firebase.FirebaseMessagingViewModel
-import mm.zamiec.garpom.controller.firebase.MyFirebaseMessagingService
-import mm.zamiec.garpom.domain.NotificationPermissionViewModel
-
+import mm.zamiec.garpom.domain.model.state.AlarmsScreenState
+import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
+import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreenViewModel
 
 @Composable
 fun AlarmsScreen(
-    notificationViewModel: NotificationPermissionViewModel = hiltViewModel(),
-    firebaseMessagingViewModel: FirebaseMessagingViewModel = hiltViewModel(),
+     alarmsScreenViewModel: AlarmsScreenViewModel = hiltViewModel(),
+     onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    val activity = LocalActivity.current
+    val uiState: AlarmsScreenState by alarmsScreenViewModel.uiState.collectAsState(AlarmsScreenState())
 
-    val notificationPermissionGranted by notificationViewModel.isPermissionGranted.collectAsState()
-    val notificationPreferenceEnabled by notificationViewModel.areNotificationsEnabled.collectAsState()
 
     Column {
-        Text("Alarms")
-        Button(
-            onClick = {
-                firebaseMessagingViewModel.log_token(activity!!)
-            }
+        Text("Your alarms:", style = MaterialTheme.typography.headlineLarge)
+        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text("Show token")
-        }
-        Button(
-            onClick = {
-            }
-        ) {
-            Text("Send token")
-        }
-        LifecycleResumeEffect(Unit) {
-            notificationViewModel.checkPermissions()
-            onPauseOrDispose { }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Push notifications: ")
-            Switch(
-                checked = notificationPreferenceEnabled,
-                onCheckedChange = { isChecked ->
-                    notificationViewModel.checkPermissions()
-                    if (isChecked) {
-                        if (notificationPermissionGranted) {
-                            notificationViewModel.updatePreference(true)
-                        } else {
-                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                            }
-                            context.startActivity(intent)
-                        }
-                    } else {
-                        notificationViewModel.updatePreference(false)
-                    }
+            uiState.stationAlarmsList.forEach {
+                item() {
+                    Text(it.stationName, style = MaterialTheme.typography.titleSmall)
                 }
-            )
-        }
-
-        Button(onClick = {
-            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                items(it.alarmList) { alarm ->
+                    Text(alarm.name)
+                    HorizontalDivider(Modifier.padding(horizontal = 20.dp))
+                }
             }
-            context.startActivity(intent)
-        }) {
-            Text("Go to settings")
+
         }
-        Text("Permission: $notificationPermissionGranted")
-        Text("Preference: $notificationPreferenceEnabled")
+        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+
+        Spacer(Modifier.height(50.dp))
+
+        Text("Recent alarm occurrences:", style = MaterialTheme.typography.headlineLarge)
+        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(uiState.recentAlarmOccurrencesList) { alarmOccurrence ->
+                Row(
+                    Modifier.padding(10.dp).clickable(onClick = {
+                        onRecentAlarmOccurrenceClicked(alarmOccurrence.measurementId)
+                    }),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(alarmOccurrence.alarmName, style = MaterialTheme.typography.titleSmall)
+
+                }
+                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+            }
+
+        }
+        Spacer(Modifier.height(50.dp))
+
+        Text("All alarm occurrences:", style = MaterialTheme.typography.headlineLarge)
+        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            items(uiState.allAlarmOccurrencesList) { alarmOccurrence ->
+                Text(alarmOccurrence.alarmName, style = MaterialTheme.typography.titleSmall)
+
+                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+            }
+
+        }
+        Spacer(Modifier.height(50.dp))
     }
 }

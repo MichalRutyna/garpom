@@ -30,7 +30,7 @@ fun MeasurementScreen(
         is MeasurementScreenState.MeasurementData -> {
             val uiState = uiState as MeasurementScreenState.MeasurementData
             Column {
-                Text(uiState.date.toString(), style= MaterialTheme.typography.headlineLarge)
+                Text(uiState.date.toString(), style=MaterialTheme.typography.headlineLarge)
 
                 Text(uiState.temperature.toString())
 

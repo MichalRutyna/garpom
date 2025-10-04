@@ -8,7 +8,7 @@ data class StationSummary(
 
 )
 
-data class RecentAlarm(
+data class RecentAlarmOccurrence(
     val alarmName: String = "",
     val measurementId: String = ""
 )
@@ -17,5 +17,5 @@ data class HomeState(
     val isAnonymous: Boolean = true,
     val username: String = "",
     val stations: List<StationSummary> = listOf(),
-    val recentAlarms: List<RecentAlarm> = listOf(),
+    val recentAlarmOccurrences: List<RecentAlarmOccurrence> = listOf(),
 )

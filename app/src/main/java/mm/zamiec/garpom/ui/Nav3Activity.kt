@@ -93,7 +93,11 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<BottomNavDestination.Alarms> {
-                            AlarmsScreen()
+                            AlarmsScreen(
+                                onRecentAlarmOccurrenceClicked = { measurementId ->
+                                    backStack.add(Measurement(measurementId))
+                                }
+                            )
                         }
                         entry<AlarmConfig> { key ->
                             StationScreen(stationId = key.id)

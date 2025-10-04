@@ -32,10 +32,10 @@ class AlarmRepository @Inject constructor() {
     fun getAlarmById(id: String): Flow<AlarmDto?> =
         db.documentAsFlow("alarms", id, ::mapper)
 
-    fun getAlarmListByIdList(ids: List<String>): Flow<List<AlarmDto>> =
+    fun getAlarmsByIdList(ids: List<String>): Flow<List<AlarmDto>> =
         db.collectionByIdsAsFlow("alarms", ids, ::mapper)
 
-    fun getAlarmByStation(stationId: String): Flow<List<AlarmDto>> =
+    fun getAlarmsByStation(stationId: String): Flow<List<AlarmDto>> =
         db.filteredCollectionAsFlow("alarms", "station_id", stationId, ::mapper)
 
 }

@@ -63,7 +63,6 @@ private fun HomeScreenContent(
 
         LazyColumn (
             verticalArrangement = Arrangement.spacedBy(4.dp),
-
         ) {
             items(uiState.stations) { station ->
                 Row (
@@ -108,7 +107,7 @@ private fun HomeScreenContent(
 
         HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         LazyColumn {
-            items(uiState.recentAlarms) { alarm ->
+            items(uiState.recentAlarmOccurrences) { alarm ->
                 Row (
                     Modifier.padding(10.dp).clickable(onClick = {
                         onRecentAlarmOccurrenceClicked(alarm.measurementId)

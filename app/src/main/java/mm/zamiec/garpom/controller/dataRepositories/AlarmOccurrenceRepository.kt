@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.Flow
 import mm.zamiec.garpom.controller.firebase.documentAsFlow
 import mm.zamiec.garpom.controller.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.controller.firebase.queryAsFlow
-import mm.zamiec.garpom.domain.model.dto.AlarmDto
 import mm.zamiec.garpom.domain.model.dto.AlarmOccurrenceDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AlarmOccuranceRepository @Inject constructor() {
+class AlarmOccurrenceRepository @Inject constructor() {
     private val db = Firebase.firestore
 
     fun mapper(doc: DocumentSnapshot): AlarmOccurrenceDto? {
@@ -40,7 +39,11 @@ class AlarmOccuranceRepository @Inject constructor() {
         db.documentAsFlow("alarm_occurrences", id) {doc ->
             mapper(doc)
         }
-    fun getRecentAlarmOccurances(userId: String): Flow<List<AlarmOccurrenceDto>> =
+
+    fun getAlarmOccurrencesByAlarm(alarmId: String): Flow<List<AlarmOccurrenceDto>> =
+        db.filteredCollectionAsFlow("alarm_occurrences", "alarm_id", alarmId, ::mapper)
+
+    fun getRecentAlarmOccurrencesForUser(userId: String): Flow<List<AlarmOccurrenceDto>> =
         db.queryAsFlow(
             db.collection("alarm_occurrences")
                 .whereEqualTo("user_id", userId)
@@ -48,6 +51,9 @@ class AlarmOccuranceRepository @Inject constructor() {
                 .limit(5),
             ::mapper
         )
+
+    fun getAlarmOccurrencesForUser(userId: String): Flow<List<AlarmOccurrenceDto>> =
+        db.filteredCollectionAsFlow("alarm_occurrences", "user_id", userId, ::mapper)
 
     fun getOccurrencesForMeasurement(measurementId: String): Flow<List<AlarmOccurrenceDto>> =
         db.filteredCollectionAsFlow("alarm_occurrences", "measurement_id", measurementId, ::mapper)
