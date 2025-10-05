@@ -114,7 +114,9 @@ private fun HomeScreenContent(
                     }),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(alarm.alarmName, Modifier.weight(1f))
+                    Text(alarm.alarmName,
+//                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f))
 
 
                     Icon(

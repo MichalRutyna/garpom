@@ -23,11 +23,14 @@ class MeasurementRepository @Inject constructor() {
             id = doc.id,
             stationId = stationId,
             date = date,
-            humidity = doc.getDouble("humidity"),
+            airHumidity = doc.getDouble("air_humidity"),
+            groundHumidity = doc.getDouble("ground_humidity"),
             co = doc.getDouble("co"),
             pressure = doc.getDouble("pressure"),
             light = doc.getDouble("light"),
             temperature = doc.getDouble("temperature"),
+            ph = doc.getDouble("ph"),
+            fire = doc.getBoolean("fire_detected"),
         )
     }
 

@@ -96,6 +96,9 @@ class Nav3Activity : ComponentActivity() {
                             AlarmsScreen(
                                 onRecentAlarmOccurrenceClicked = { measurementId ->
                                     backStack.add(Measurement(measurementId))
+                                },
+                                onAlarmClicked = { alarmId ->
+                                    // TODO
                                 }
                             )
                         }
@@ -129,7 +132,11 @@ class Nav3Activity : ComponentActivity() {
                             StationScreen(stationId = key.id)
                         }
                         entry<Measurement> { key ->
-                            MeasurementScreen(measurementId = key.id)
+                            MeasurementScreen(
+                                measurementId = key.id,
+                                onAlarmClick = {
+//                                    backStack.add() TODO
+                                })
                         }
                     },
                     predictivePopTransitionSpec =
