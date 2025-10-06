@@ -136,7 +136,11 @@ class Nav3Activity : ComponentActivity() {
                                 measurementId = key.id,
                                 onAlarmClick = {
 //                                    backStack.add() TODO
-                                })
+                                },
+                                onBack = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
                     },
                     predictivePopTransitionSpec =

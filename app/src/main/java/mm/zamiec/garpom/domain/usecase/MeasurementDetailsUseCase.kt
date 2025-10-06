@@ -1,6 +1,7 @@
 package mm.zamiec.garpom.domain.usecase
 
 
+import android.util.Log
 import kotlinx.coroutines.flow.firstOrNull
 import mm.zamiec.garpom.controller.dataRepositories.AlarmConditionRepository
 import mm.zamiec.garpom.controller.dataRepositories.AlarmOccurrenceRepository
@@ -50,6 +51,7 @@ class MeasurementDetailsUseCase @Inject constructor(
                         .getConditionById(occurrence.conditionId, occurrence.alarmId)
                         .firstOrNull()
                 if (alarm != null && condition != null) {
+                    Log.d("HERE", "alarm par: "+condition.parameter)
                     condition.parameter to TriggeredAlarm(
                         alarm.id,
                         alarm.name

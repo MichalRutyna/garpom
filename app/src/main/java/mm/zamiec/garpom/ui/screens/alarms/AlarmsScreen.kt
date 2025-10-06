@@ -97,6 +97,7 @@ private fun AlarmsScreenContent(
                             .padding(top = 5.dp, bottom = 5.dp)
                             .padding(start = 30.dp, end = 10.dp)
                             .clickable(onClick = {
+                                onAlarmClicked(alarm.alarmId)
                             }),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
