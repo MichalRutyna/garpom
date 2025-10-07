@@ -31,10 +31,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import mm.zamiec.garpom.domain.model.state.AlarmOccurrence
 import mm.zamiec.garpom.domain.model.state.AlarmSummary
 import mm.zamiec.garpom.domain.model.state.AlarmsScreenState
-import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
 import mm.zamiec.garpom.domain.model.state.RecentAlarmOccurrence
 import mm.zamiec.garpom.domain.model.state.StationAlarms
-import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreenViewModel
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable

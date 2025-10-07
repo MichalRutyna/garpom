@@ -8,11 +8,11 @@ import mm.zamiec.garpom.controller.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.controller.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.controller.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.controller.dataRepositories.StationRepository
-import mm.zamiec.garpom.domain.model.state.FireCard
-import mm.zamiec.garpom.domain.model.state.MeasurementCardFactory
-import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
-import mm.zamiec.garpom.domain.model.state.MeasurementType
-import mm.zamiec.garpom.domain.model.state.TriggeredAlarm
+import mm.zamiec.garpom.domain.model.state.measurement.FireCard
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementCardFactory
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementScreenState
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementType
+import mm.zamiec.garpom.domain.model.state.measurement.TriggeredAlarm
 import javax.inject.Inject
 import javax.inject.Singleton
 

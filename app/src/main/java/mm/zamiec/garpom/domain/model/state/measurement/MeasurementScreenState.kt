@@ -1,8 +1,6 @@
-package mm.zamiec.garpom.domain.model.state
+package mm.zamiec.garpom.domain.model.state.measurement
 
-import android.os.Message
 import com.google.firebase.Timestamp
-import javax.annotation.ParametersAreNullableByDefault
 
 open class MeasurementScreenState () {
     class MeasurementData(

@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.domain.model.state
+package mm.zamiec.garpom.domain.model.state.measurement
 
 enum class MeasurementType(val title: String, val unit: String, val dbName: String) {
     TEMPERATURE("Temperature", "°C", "temperature"),

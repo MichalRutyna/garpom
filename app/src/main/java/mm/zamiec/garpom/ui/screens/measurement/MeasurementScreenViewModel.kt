@@ -7,13 +7,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import mm.zamiec.garpom.controller.auth.AuthRepository
-import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementScreenState
 import mm.zamiec.garpom.domain.usecase.MeasurementDetailsUseCase
 
 @HiltViewModel(assistedFactory = MeasurementScreenViewModel.Factory::class)

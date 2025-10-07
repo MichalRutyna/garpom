@@ -38,11 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.firebase.Timestamp
-import mm.zamiec.garpom.domain.model.state.FireCard
-import mm.zamiec.garpom.domain.model.state.MeasurementCardFactory
-import mm.zamiec.garpom.domain.model.state.MeasurementScreenState
-import mm.zamiec.garpom.domain.model.state.MeasurementType
-import mm.zamiec.garpom.domain.model.state.TriggeredAlarm
+import mm.zamiec.garpom.domain.model.state.measurement.FireCard
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementCardFactory
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementScreenState
+import mm.zamiec.garpom.domain.model.state.measurement.MeasurementType
+import mm.zamiec.garpom.domain.model.state.measurement.TriggeredAlarm
 import java.util.Locale
 
 @Composable

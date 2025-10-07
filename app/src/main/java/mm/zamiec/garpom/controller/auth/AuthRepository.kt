@@ -1,6 +1,8 @@
 package mm.zamiec.garpom.controller.auth
 
 import android.util.Log
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -11,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,19 +23,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import mm.zamiec.garpom.domain.usecase.TokenUseCase
 import mm.zamiec.garpom.domain.model.AppUser
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.coroutines.resume
 
 @ActivityRetainedScoped
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val serverInteractor: TokenUseCase
+    private val serverInteractor: TokenUseCase,
+    private val appUserRepository: AppUserRepository,
 ) {
 
     val TAG = "AuthRepository"
@@ -44,12 +53,33 @@ class AuthRepository @Inject constructor(
 
     val currentUser: StateFlow<AppUser> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(
-                auth.currentUser?.let {
-                    AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
-                } ?: AppUser()
-            )
+            val firebaseUser = auth.currentUser
+
+            if (firebaseUser == null) {
+                // User signed out
+                trySend(AppUser())
+                return@AuthStateListener
+            }
+
+            launch {
+                if (firebaseUser.isAnonymous) {
+                    trySend(
+                        AppUser(
+                            id = firebaseUser.uid,
+                            username = firebaseUser.displayName ?: "Unnamed",
+                            isAnonymous = true
+                        )
+                    )
+                } else {
+                    appUserRepository
+                        .getUserById(firebaseUser.uid)
+                        .collect { user ->
+                            trySend(user)
+                        }
+                }
+            }
         }
+
         firebaseAuth.addAuthStateListener(listener)
         awaitClose { firebaseAuth.removeAuthStateListener(listener) }
     }.stateIn(
@@ -58,19 +88,6 @@ class AuthRepository @Inject constructor(
         initialValue = AppUser()
     )
 
-//    val currentUser: Flow<AppUser>
-//        get() = callbackFlow {
-//            val listener =
-//                FirebaseAuth.AuthStateListener { auth ->
-//                    Log.d(TAG, "Called get")
-//                    this.trySend(auth.currentUser?.let {
-//                        AppUser(it.uid, it.displayName ?: "Unnamed", it.isAnonymous)
-//
-//                    } ?: AppUser())
-//                }
-//            firebaseAuth.addAuthStateListener(listener)
-//            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
-//        }
 
     fun signInAnonymously() {
         firebaseAuth.signInAnonymously()
@@ -97,6 +114,29 @@ class AuthRepository @Inject constructor(
         firebaseAuth.signOut()
         signInAnonymously()
     }
+
+    suspend fun changeUsername(username: String): ChangeUsernameResult =
+        suspendCancellableCoroutine { cont ->
+            val user = firebaseAuth.currentUser
+            if (user == null) {
+                cont.resume(ChangeUsernameResult.Error("User not logged in"))
+            } else {
+                val listener = OnCompleteListener<Void?> { result ->
+                    if (result.isSuccessful) {
+                        Log.d(TAG, "Changed username successful")
+                        cont.resume(ChangeUsernameResult.Success)
+                    } else {
+                        Log.d(TAG, "Changed username failed/canceled")
+                        cont.resume(ChangeUsernameResult.Error("Operation failed"))
+                    }
+                }
+                appUserRepository.changeUsername(user.uid, username)
+                    .addOnCompleteListener(listener)
+                    .addOnFailureListener { e ->
+                        cont.resume(ChangeUsernameResult.Error(e.message ?: "Unknown error"))
+                    }
+            }
+        }
 
     fun startPhoneNumberVerification(
         phoneNumber: String,
@@ -203,4 +243,10 @@ sealed class VerificationResult {
     data object InvalidCredential : VerificationResult()
 
     data class Error(val message: String) : VerificationResult()
+}
+
+sealed class ChangeUsernameResult {
+    data object Success: ChangeUsernameResult()
+    data object Loading: ChangeUsernameResult()
+    data class Error(val message: String) : ChangeUsernameResult()
 }
