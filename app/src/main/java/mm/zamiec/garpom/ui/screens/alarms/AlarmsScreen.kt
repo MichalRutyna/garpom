@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,10 +42,11 @@ fun AlarmsScreen(
      alarmsScreenViewModel: AlarmsScreenViewModel = hiltViewModel(),
      onRecentAlarmOccurrenceClicked: (String) -> Unit,
      onAlarmClicked: (String) -> Unit,
+     onStationClicked: (String) -> Unit,
 ) {
     val uiState: AlarmsScreenState by alarmsScreenViewModel.uiState.collectAsState(AlarmsScreenState())
 
-    AlarmsScreenContent(uiState, onRecentAlarmOccurrenceClicked, onAlarmClicked)
+    AlarmsScreenContent(uiState, onRecentAlarmOccurrenceClicked, onAlarmClicked, onStationClicked)
 }
 
 @Composable
@@ -51,6 +54,7 @@ private fun AlarmsScreenContent(
     uiState: AlarmsScreenState,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
     onAlarmClicked: (String) -> Unit,
+    onStationClicked: (String) -> Unit,
 ) {
     Column {
         Text(
@@ -72,6 +76,7 @@ private fun AlarmsScreenContent(
                         Modifier
                             .padding(10.dp).padding(end = 10.dp)
                             .clickable(onClick = {
+                                onStationClicked(it.stationId)
                             }),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -95,7 +100,7 @@ private fun AlarmsScreenContent(
                     Row(
                         Modifier
                             .padding(top = 5.dp, bottom = 5.dp)
-                            .padding(start = 30.dp, end = 10.dp)
+                            .padding(start = 30.dp, end = 20.dp)
                             .clickable(onClick = {
                                 onAlarmClicked(alarm.alarmId)
                             }),
@@ -107,8 +112,9 @@ private fun AlarmsScreenContent(
                             modifier = Modifier.weight(1f),
                         )
                         Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            "Show details")
+                            Icons.Filled.Settings,
+                            "Show details",
+                            modifier = Modifier.scale(0.75f))
                     }
                     HorizontalDivider(Modifier.padding(horizontal = 20.dp))
                 }
@@ -200,7 +206,7 @@ fun Preview() {
         listOf(
             StationAlarms(
                 "Test station",
-                listOf(
+                alarmList = listOf(
                     AlarmSummary(
                         "",
                         "Test alarm",
@@ -220,7 +226,7 @@ fun Preview() {
             ),
             StationAlarms(
                 "Test station",
-                listOf(
+                alarmList = listOf(
                     AlarmSummary(
                         "",
                         "Test alarm",
@@ -243,6 +249,6 @@ fun Preview() {
         )
     )
     GarPomTheme {
-        AlarmsScreenContent(uiState, {}, {})
+        AlarmsScreenContent(uiState, {}, {}, {})
     }
 }

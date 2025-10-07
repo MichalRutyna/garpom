@@ -9,7 +9,8 @@ data class AlarmsScreenState (
 )
 
 data class StationAlarms (
-    val stationName: String,
+    val stationName: String = "",
+    val stationId: String = "",
     val alarmList: List<AlarmSummary>,
 )
 

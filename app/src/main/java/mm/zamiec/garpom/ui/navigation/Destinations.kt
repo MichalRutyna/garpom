@@ -3,7 +3,6 @@ package mm.zamiec.garpom.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,7 +54,7 @@ data class Station(
 
 
 @Serializable
-data class Measurement(
+data class MeasurementScreen(
     val id: String
 ) : NavKey
 

@@ -37,6 +37,7 @@ class MeasurementRepository @Inject constructor() {
     fun getMeasurementById(id: String): Flow<MeasurementDto?> =
         db.documentAsFlow("measurements", id, ::mapper)
 
-    fun getMeasurementsByOwner(ownerId: String): Flow<List<MeasurementDto>> =
-        db.filteredCollectionAsFlow("measurements", "owner_id", ownerId, ::mapper)
+    fun getMeasurementsByStation(stationId: String): Flow<List<MeasurementDto>> =
+        db.filteredCollectionAsFlow("measurements",
+            "station_id", stationId, ::mapper)
 }

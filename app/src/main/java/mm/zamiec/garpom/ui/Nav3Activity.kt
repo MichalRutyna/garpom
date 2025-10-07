@@ -10,7 +10,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +25,7 @@ import mm.zamiec.garpom.ui.navigation.AlarmConfig
 import mm.zamiec.garpom.ui.navigation.AppNavigationBar
 import mm.zamiec.garpom.ui.navigation.Auth
 import mm.zamiec.garpom.ui.navigation.BottomNavDestination
-import mm.zamiec.garpom.ui.navigation.Measurement
+import mm.zamiec.garpom.ui.navigation.MeasurementScreen
 import mm.zamiec.garpom.ui.navigation.Station
 import mm.zamiec.garpom.ui.navigation.StationConfig
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
@@ -88,22 +87,25 @@ class Nav3Activity : ComponentActivity() {
                                     backStack.add(Station(stationId))
                                 },
                                 onRecentAlarmOccurrenceClicked = { measurementId ->
-                                    backStack.add(Measurement(measurementId))
+                                    backStack.add(MeasurementScreen(measurementId))
                                 }
                             )
                         }
                         entry<BottomNavDestination.Alarms> {
                             AlarmsScreen(
                                 onRecentAlarmOccurrenceClicked = { measurementId ->
-                                    backStack.add(Measurement(measurementId))
+                                    backStack.add(MeasurementScreen(measurementId))
                                 },
                                 onAlarmClicked = { alarmId ->
-                                    // TODO
+                                    // TODO go to alarm config
+                                },
+                                onStationClicked = { stationId ->
+                                    backStack.add(Station(stationId))
                                 }
                             )
                         }
                         entry<AlarmConfig> { key ->
-                            StationScreen(stationId = key.id)
+                            // TODO alarm config
                         }
                         entry<BottomNavDestination.Configure> {
                             ConfigureScreen(
@@ -114,7 +116,7 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<StationConfig> { key ->
-                            StationScreen(stationId = key.id)
+                            // TODO station config
                         }
                         entry<BottomNavDestination.Profile> {
                             ProfileScreen(onNavigateToAuth = {
@@ -129,13 +131,24 @@ class Nav3Activity : ComponentActivity() {
                             isInSubNavigation = isInSubNavigation)
                         }
                         entry<Station> { key ->
-                            StationScreen(stationId = key.id)
+                            StationScreen(
+                                stationId = key.id,
+                                onMeasurementClicked = { measurementId ->
+                                    backStack.add(MeasurementScreen(measurementId))
+                                },
+                                onErrorClicked = {
+                                    // TODO go to station
+                                },
+                                onBack = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
-                        entry<Measurement> { key ->
+                        entry<MeasurementScreen> { key ->
                             MeasurementScreen(
                                 measurementId = key.id,
                                 onAlarmClick = {
-//                                    backStack.add() TODO
+                                    // TODO go to alarm config
                                 },
                                 onBack = {
                                     backStack.removeLastOrNull()

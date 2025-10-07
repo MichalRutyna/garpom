@@ -50,9 +50,9 @@ class AlarmsListUseCase @Inject constructor(
                                     }
                             }
                             if (alarmSummaries.isEmpty()) {
-                                flowOf(StationAlarms(station.name, emptyList()))
+                                flowOf(StationAlarms(station.name, station.id,emptyList()))
                             } else {
-                                combine(alarmSummaries) { StationAlarms(station.name, it.toList()) }
+                                combine(alarmSummaries) { StationAlarms(station.name, station.id, it.toList()) }
                             }
                     }
                 }

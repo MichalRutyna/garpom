@@ -51,6 +51,13 @@ class AlarmOccurrenceRepository @Inject constructor() {
                 .limit(5),
             ::mapper
         )
+    fun getAlarmOccurrencesForStation(stationId: String): Flow<List<AlarmOccurrenceDto>> =
+        db.queryAsFlow(
+            db.collection("alarm_occurrences")
+                .whereEqualTo("station_id", stationId)
+                .orderBy("date", Query.Direction.DESCENDING),
+            ::mapper
+        )
 
     fun getAlarmOccurrencesForUser(userId: String): Flow<List<AlarmOccurrenceDto>> =
         db.filteredCollectionAsFlow("alarm_occurrences", "user_id", userId, ::mapper)
