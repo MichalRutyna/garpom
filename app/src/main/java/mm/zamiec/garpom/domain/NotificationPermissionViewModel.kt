@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationPermissionViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _timesClicked = MutableStateFlow(0)
 

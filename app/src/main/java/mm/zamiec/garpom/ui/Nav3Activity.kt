@@ -156,6 +156,11 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                     },
+//                    transitionSpec =
+//                        {
+//                            slideInHorizontally(initialOffsetX = { it }) togetherWith
+//                                    slideOutHorizontally(targetOffsetX = { it })
+//                        },
                     predictivePopTransitionSpec =
                         if (!isInSubNavigation.value) {
                             NavDisplay.defaultPredictivePopTransitionSpec
