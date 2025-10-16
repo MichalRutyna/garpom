@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
@@ -54,135 +56,38 @@ private fun AlarmsScreenContent(
     onAlarmClicked: (String) -> Unit,
     onStationClicked: (String) -> Unit,
 ) {
-    Column {
-        Text(
-            "Your alarms:",
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
-        )
-        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-        ) {
-            uiState.stationAlarmsList.forEach {
-                item() {
-                    Row(
-                        Modifier
-                            .padding(10.dp).padding(end = 10.dp)
-                            .clickable(onClick = {
-                                onStationClicked(it.stationId)
-                            }),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Outlined.Menu,
-                            "Station",
-                            modifier = Modifier.padding(end = 3.dp)
-                        )
-                        Text(
-                            it.stationName,
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            "Show details")
-                    }
-                    HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-                }
-                items(it.alarmList) { alarm ->
-                    Row(
-                        Modifier
-                            .padding(top = 5.dp, bottom = 5.dp)
-                            .padding(start = 30.dp, end = 20.dp)
-                            .clickable(onClick = {
-                                onAlarmClicked(alarm.alarmId)
-                            }),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            alarm.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Icon(
-                            Icons.Filled.Settings,
-                            "Show details",
-                            modifier = Modifier.scale(0.75f))
-                    }
-                    HorizontalDivider(Modifier.padding(horizontal = 20.dp))
-                }
-            }
-
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        item() {
+            Text(
+                "Your alarms:",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center
+            )
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
-
-        Spacer(Modifier.height(50.dp))
-
-        Text(
-            "Recent alarm occurrences:",
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
-        )
-        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            items(uiState.recentAlarmOccurrencesList) { alarmOccurrence ->
+        uiState.stationAlarmsList.forEach {
+            item() {
                 Row(
                     Modifier
-                        .padding(10.dp)
+                        .padding(10.dp).padding(end = 10.dp)
                         .clickable(onClick = {
-                            onRecentAlarmOccurrenceClicked(alarmOccurrence.measurementId)
+                            onStationClicked(it.stationId)
                         }),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        alarmOccurrence.alarmName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f),
-                    )
                     Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        "Show details")
-
-                }
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
-
-        }
-        Spacer(Modifier.height(50.dp))
-
-        Text(
-            "All alarm occurrences:",
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
-        )
-        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            items(uiState.allAlarmOccurrencesList) { alarmOccurrence ->
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .clickable(onClick = {
-                            onRecentAlarmOccurrenceClicked(alarmOccurrence.measurementId)
-                        }),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                        Icons.Outlined.Menu,
+                        "Station",
+                        modifier = Modifier.padding(end = 3.dp)
+                    )
                     Text(
-                        alarmOccurrence.alarmName,
-                        style = MaterialTheme.typography.bodyMedium,
+                        it.stationName,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1f),
                     )
                     Icon(
@@ -191,9 +96,98 @@ private fun AlarmsScreenContent(
                 }
                 HorizontalDivider(Modifier.padding(horizontal = 10.dp))
             }
-
+            items(it.alarmList) { alarm ->
+                Row(
+                    Modifier
+                        .padding(top = 5.dp, bottom = 5.dp)
+                        .padding(start = 30.dp, end = 20.dp)
+                        .clickable(onClick = {
+                            onAlarmClicked(alarm.alarmId)
+                        }),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        alarm.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        Icons.Filled.Settings,
+                        "Show details",
+                        modifier = Modifier.scale(0.75f))
+                }
+                HorizontalDivider(Modifier.padding(horizontal = 20.dp))
+            }
         }
-        Spacer(Modifier.height(50.dp))
+        item () {
+            Spacer(Modifier.height(50.dp))
+
+            Text(
+                "Recent alarm occurrences:",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center
+            )
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        items(uiState.recentAlarmOccurrencesList) { alarmOccurrence ->
+            Row(
+                Modifier
+                    .padding(10.dp)
+                    .clickable(onClick = {
+                        onRecentAlarmOccurrenceClicked(alarmOccurrence.measurementId)
+                    }),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    alarmOccurrence.alarmName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    "Show details")
+
+            }
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+
+        item() {
+            Spacer(Modifier.height(50.dp))
+
+            Text(
+                "All alarm occurrences:",
+                Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center
+            )
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        items(uiState.allAlarmOccurrencesList) { alarmOccurrence ->
+            Row(
+                Modifier
+                    .padding(10.dp)
+                    .clickable(onClick = {
+                        onRecentAlarmOccurrenceClicked(alarmOccurrence.measurementId)
+                    }),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    alarmOccurrence.alarmName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    "Show details")
+            }
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+
     }
 }
 

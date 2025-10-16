@@ -48,85 +48,81 @@ private fun HomeScreenContent(
     onStationSummaryClicked: (String) -> Unit,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
-    Column {
-        val text =
-            if (uiState.isAnonymous) "Welcome!"
-            else "Welcome, ${uiState.username}!"
-        Text(
-            text,
-            Modifier.fillMaxWidth().padding(10.dp),
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center
-        )
+    LazyColumn (
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        item() {
+            val text =
+                if (uiState.isAnonymous) "Welcome!"
+                else "Welcome, ${uiState.username}!"
+            Text(
+                text,
+                Modifier.fillMaxWidth().padding(10.dp),
+                style = MaterialTheme.typography.headlineLarge,
+                textAlign = TextAlign.Center
+            )
 
-        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-
-        LazyColumn (
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            items(uiState.stations) { station ->
-                Row (
-                    Modifier.padding(10.dp).clickable(onClick = {
-                        onStationSummaryClicked(station.stationId)
-                    }),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(station.name, Modifier.weight(1f))
-
-
-                    if (station.hasNotification) {
-                        Icon(
-                            Icons.Filled.Notifications,
-                            "You have a notification"
-                        )
-                    }
-                    if (station.hasError) {
-                        Icon(
-                            Icons.Filled.Warning,
-                            "This station has a problem"
-                        )
-                    }
-                     Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        "Show details")
-
-
-                }
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
-
-        Spacer(Modifier.height(50.dp))
-
-        Text(
-            "Recent alarms:",
-            Modifier.fillMaxWidth().padding(10.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center
-        )
-
-        HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-        LazyColumn {
-            items(uiState.recentAlarmOccurrences) { alarm ->
-                Row (
-                    Modifier.padding(10.dp).clickable(onClick = {
-                        onRecentAlarmOccurrenceClicked(alarm.measurementId)
-                    }),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(alarm.alarmName,
-//                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f))
+        items(uiState.stations) { station ->
+            Row (
+                Modifier.padding(10.dp).clickable(onClick = {
+                    onStationSummaryClicked(station.stationId)
+                }),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(station.name, Modifier.weight(1f))
 
 
+                if (station.hasNotification) {
                     Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        "Show details")
-
-
+                        Icons.Filled.Notifications,
+                        "You have a notification"
+                    )
                 }
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+                if (station.hasError) {
+                    Icon(
+                        Icons.Filled.Warning,
+                        "This station has a problem"
+                    )
+                }
+                 Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    "Show details")
+
+
             }
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        item() {
+            Spacer(Modifier.height(50.dp))
+            Text(
+                "Recent alarms:",
+                Modifier.fillMaxWidth().padding(10.dp),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center
+            )
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        items(uiState.recentAlarmOccurrences) { alarm ->
+            Row (
+                Modifier.padding(10.dp).clickable(onClick = {
+                    onRecentAlarmOccurrenceClicked(alarm.measurementId)
+                }),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(alarm.alarmName,
+//                        style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f))
+
+
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    "Show details")
+
+
+            }
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
     }
 }
