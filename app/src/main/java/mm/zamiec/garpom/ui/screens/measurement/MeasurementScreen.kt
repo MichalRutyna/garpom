@@ -37,12 +37,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.google.firebase.Timestamp
-import mm.zamiec.garpom.domain.model.state.measurement.FireCard
-import mm.zamiec.garpom.domain.model.state.measurement.MeasurementCardFactory
-import mm.zamiec.garpom.domain.model.state.measurement.MeasurementScreenState
-import mm.zamiec.garpom.domain.model.state.measurement.MeasurementType
-import mm.zamiec.garpom.domain.model.state.measurement.TriggeredAlarm
+import mm.zamiec.garpom.ui.state.measurement.FireCard
+import mm.zamiec.garpom.ui.state.measurement.MeasurementCardFactory
+import mm.zamiec.garpom.ui.state.measurement.MeasurementScreenState
+import mm.zamiec.garpom.ui.state.measurement.Parameter
+import mm.zamiec.garpom.ui.state.measurement.TriggeredAlarm
+import java.time.Instant
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -115,7 +116,7 @@ private fun MeasurementDataScreen(
         ) {
             Text(
                 text = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", Locale.getDefault())
-                    .format(uiState.date.toDate())
+                    .format(uiState.date)
                     .replaceFirstChar {
                         it.uppercaseChar()
                     },
@@ -243,10 +244,10 @@ private fun MeasurementLoadingScreen() {
 fun Preview() {
     val uistate = MeasurementScreenState.MeasurementData(
         stationName = "Test test test station",
-        date = Timestamp.now(),
+        date = Date.from(Instant.now()),
         cards = listOf(
             MeasurementCardFactory.create(
-                MeasurementType.TEMPERATURE,
+                Parameter.TEMPERATURE,
                 21.3,
                 listOf(
                     TriggeredAlarm(
@@ -264,7 +265,7 @@ fun Preview() {
                 )
             ),
             MeasurementCardFactory.create(
-                MeasurementType.AIR_HUMIDITY,
+                Parameter.AIR_HUMIDITY,
                 12.1,
                 listOf(
                 )

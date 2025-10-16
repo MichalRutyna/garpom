@@ -33,9 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.domain.model.state.MeasurementSummary
-import mm.zamiec.garpom.domain.model.state.Notification
-import mm.zamiec.garpom.domain.model.state.StationScreenState
+import mm.zamiec.garpom.ui.state.MeasurementSummaryItemUiState
+import mm.zamiec.garpom.ui.state.NotificationItemUiState
+import mm.zamiec.garpom.ui.state.StationScreenUiState
 import java.util.Locale
 
 @Composable
@@ -50,28 +50,28 @@ fun StationScreen(
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    val uiState: StationScreenState by stationViewModel.uiState.collectAsState(StationScreenState())
+    val uiState: StationScreenUiState by stationViewModel.uiState.collectAsState(StationScreenUiState())
 
     when(uiState) {
-        is StationScreenState.StationData ->
+        is StationScreenUiState.StationData ->
             StationScreenContent(
-                uiState as StationScreenState.StationData,
+                uiState as StationScreenUiState.StationData,
                 onMeasurementClicked,
                 onErrorClicked,
                 onBack
             )
-        is StationScreenState.Error ->
+        is StationScreenUiState.Error ->
             StationErrorScreen(
-                uiState as StationScreenState.Error
+                uiState as StationScreenUiState.Error
             )
-        is StationScreenState.Loading ->
+        is StationScreenUiState.Loading ->
             StationLoadingScreen()
     }
 }
 
 @Composable
 private fun StationScreenContent(
-    uiState: StationScreenState.StationData,
+    uiState: StationScreenUiState.StationData,
     onMeasurementClicked: (String) -> Unit,
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
@@ -124,9 +124,9 @@ private fun StationScreenContent(
                             modifier = Modifier.padding(10.dp)
                                 .clickable(onClick = {
                                     when (notification) {
-                                        is Notification.AlarmNotification ->
+                                        is NotificationItemUiState.AlarmNotification ->
                                             onMeasurementClicked(notification.measurementId)
-                                        is Notification.ErrorNotification ->
+                                        is NotificationItemUiState.ErrorNotification ->
                                             onErrorClicked(notification.stationId)
                                     }
                                 }),
@@ -196,7 +196,7 @@ private fun StationScreenContent(
                             Text(SimpleDateFormat(
                                     "d MMMM, HH:mm",
                                     Locale.getDefault())
-                                    .format(measurement.date.toDate()),
+                                    .format(measurement.date),
                                 modifier = Modifier.weight(1f))
                             Icon(
                                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -212,7 +212,7 @@ private fun StationScreenContent(
 }
 
 @Composable
-private fun StationErrorScreen(uiState: StationScreenState.Error) {
+private fun StationErrorScreen(uiState: StationScreenUiState.Error) {
     Text("Error: ${uiState.msg}")
 }
 
@@ -229,19 +229,19 @@ private fun StationLoadingScreen() {
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
-    val uiState = StationScreenState.StationData(
+    val uiState = StationScreenUiState.StationData(
         name = "Test station",
         notifications = listOf(
-            Notification.AlarmNotification(alarmName = "Test alarm"),
-            Notification.ErrorNotification(
+            NotificationItemUiState.AlarmNotification(alarmName = "Test alarm"),
+            NotificationItemUiState.ErrorNotification(
                 msg = "Station \"Test station\" is not responding"
             )
         ),
         measurementList = listOf(
-            MeasurementSummary(),
-            MeasurementSummary(),
-            MeasurementSummary(),
-            MeasurementSummary(),
+            MeasurementSummaryItemUiState(),
+            MeasurementSummaryItemUiState(),
+            MeasurementSummaryItemUiState(),
+            MeasurementSummaryItemUiState(),
         ),
     )
     StationScreenContent(uiState, {}, {}, {})

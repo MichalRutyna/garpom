@@ -23,7 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.domain.model.state.ConfigureScreenState
+import mm.zamiec.garpom.ui.state.ConfigureScreenUiState
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -32,8 +32,8 @@ class BluetoothViewModel @Inject constructor (
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ConfigureScreenState>(ConfigureScreenState.Idle)
-    val uiState: StateFlow<ConfigureScreenState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<ConfigureScreenUiState>(ConfigureScreenUiState.Idle)
+    val uiState: StateFlow<ConfigureScreenUiState> = _uiState.asStateFlow()
 
     private val _bluetoothPermissionGranted = MutableStateFlow(false)
 
@@ -49,7 +49,7 @@ class BluetoothViewModel @Inject constructor (
 
     fun updatePermissionStatus(granted: Boolean) {
         _bluetoothPermissionGranted.value = granted
-        if (granted and (_uiState.value == ConfigureScreenState.BluetoothRejected)) {
+        if (granted and (_uiState.value == ConfigureScreenUiState.BluetoothRejected)) {
             alertPermissionConfirmed()
 
         }
@@ -62,7 +62,7 @@ class BluetoothViewModel @Inject constructor (
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
         if (bluetoothAdapter == null) {
             Log.w(TAG,"Bluetooth is not supported on this device")
-            _uiState.value = ConfigureScreenState.DeviceIncompatible
+            _uiState.value = ConfigureScreenUiState.DeviceIncompatible
             return
         }
 
@@ -122,19 +122,19 @@ class BluetoothViewModel @Inject constructor (
     }
 
     fun alertPermissionConfirmed() {
-        _uiState.value = ConfigureScreenState.PermissionConfirmed
+        _uiState.value = ConfigureScreenUiState.PermissionConfirmed
     }
 
     fun alertPairingLaunched() {
-        _uiState.value = ConfigureScreenState.Idle
+        _uiState.value = ConfigureScreenUiState.Idle
         // TODO special state
     }
 
     fun alertPermissionRejected() {
-        _uiState.value = ConfigureScreenState.BluetoothRejected
+        _uiState.value = ConfigureScreenUiState.BluetoothRejected
     }
 
     fun clearDialog() {
-        _uiState.value = ConfigureScreenState.Idle
+        _uiState.value = ConfigureScreenUiState.Idle
     }
 }

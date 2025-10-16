@@ -2,7 +2,6 @@ package mm.zamiec.garpom.ui.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.domain.model.state.HomeState
-import mm.zamiec.garpom.domain.model.state.StationSummary
+import mm.zamiec.garpom.ui.state.HomeUiState
+import mm.zamiec.garpom.ui.state.StationSummaryItemUiState
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable
@@ -37,14 +36,14 @@ fun HomeScreen(
     onStationSummaryClicked: (String) -> Unit,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
-    val uiState: HomeState by homeViewModel.uiState.collectAsState(HomeState())
+    val uiState: HomeUiState by homeViewModel.uiState.collectAsState(HomeUiState())
 
     HomeScreenContent(uiState, onStationSummaryClicked, onRecentAlarmOccurrenceClicked)
 }
 
 @Composable
 private fun HomeScreenContent(
-    uiState: HomeState,
+    uiState: HomeUiState,
     onStationSummaryClicked: (String) -> Unit,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
 ) {
@@ -130,14 +129,14 @@ private fun HomeScreenContent(
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    val uiState = HomeState(
+    val uiState = HomeUiState(
         false,
         "preview",
         listOf(
-            StationSummary(stationId = "1", name = "South station"),
-            StationSummary(stationId = "2", name = "North station", hasError = true),
-            StationSummary(stationId = "3", name = "East station", hasNotification = true),
-            StationSummary(
+            StationSummaryItemUiState(stationId = "1", name = "South station"),
+            StationSummaryItemUiState(stationId = "2", name = "North station", hasError = true),
+            StationSummaryItemUiState(stationId = "3", name = "East station", hasNotification = true),
+            StationSummaryItemUiState(
                 stationId = "4",
                 name = "West station",
                 hasError = true,

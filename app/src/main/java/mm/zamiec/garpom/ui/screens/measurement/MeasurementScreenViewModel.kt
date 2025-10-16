@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import mm.zamiec.garpom.controller.auth.AuthRepository
-import mm.zamiec.garpom.domain.model.state.measurement.MeasurementScreenState
-import mm.zamiec.garpom.domain.usecase.MeasurementDetailsUseCase
+import mm.zamiec.garpom.data.auth.AuthRepository
+import mm.zamiec.garpom.ui.state.measurement.MeasurementScreenState
+import mm.zamiec.garpom.domain.managers.MeasurementDetailsManager
 
 @HiltViewModel(assistedFactory = MeasurementScreenViewModel.Factory::class)
 class MeasurementScreenViewModel @AssistedInject constructor(
     private val repository: AuthRepository,
-    private val measurementDetailsUseCase: MeasurementDetailsUseCase,
+    private val measurementDetailsManager: MeasurementDetailsManager,
     @Assisted private val measurementId: String,
 ) : ViewModel() {
 
@@ -34,7 +34,7 @@ class MeasurementScreenViewModel @AssistedInject constructor(
     private fun loadMeasurement() {
         viewModelScope.launch {
             _uiState.value = MeasurementScreenState.Loading
-            val snapshot = measurementDetailsUseCase.measurementDetailsSnapshot(measurementId)
+            val snapshot = this@MeasurementScreenViewModel.measurementDetailsManager.measurementDetailsSnapshot(measurementId)
             _uiState.value = snapshot
         }
     }

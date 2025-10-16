@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import mm.zamiec.garpom.controller.firebase.FirebaseMessagingViewModel
+import mm.zamiec.garpom.data.firebase.FirebaseMessagingViewModel
 import mm.zamiec.garpom.domain.NotificationPermissionViewModel
 
 

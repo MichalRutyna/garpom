@@ -1,14 +1,10 @@
 package mm.zamiec.garpom.ui.screens.profile
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
-import mm.zamiec.garpom.controller.auth.AuthRepository
-import mm.zamiec.garpom.controller.auth.ChangeUsernameResult
+import mm.zamiec.garpom.data.auth.AuthRepository
+import mm.zamiec.garpom.data.auth.ChangeUsernameResult
 import javax.inject.Inject
 
 @HiltViewModel

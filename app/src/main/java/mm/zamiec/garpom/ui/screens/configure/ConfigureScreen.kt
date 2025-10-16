@@ -30,7 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
-import mm.zamiec.garpom.domain.model.state.ConfigureScreenState
+import mm.zamiec.garpom.ui.state.ConfigureScreenUiState
 
 val TAG = "ConfigureScreen"
 
@@ -96,7 +96,7 @@ fun ConfigureScreen(
         onPauseOrDispose {  }
     }
 
-    if (configureState.value == ConfigureScreenState.PermissionDialog) {
+    if (configureState.value == ConfigureScreenUiState.PermissionDialog) {
         BluetoothExplanationDialog(
             onDismiss = {
                 bluetoothViewModel.alertPermissionRejected()
@@ -106,21 +106,21 @@ fun ConfigureScreen(
             })
     }
 
-    if (configureState.value == ConfigureScreenState.BluetoothRejected) {
+    if (configureState.value == ConfigureScreenUiState.BluetoothRejected) {
         BluetoothRejectedDialog(onConfirmed = {
             onUnableToConfigure()
             bluetoothViewModel.clearDialog()
         })
     }
 
-    if (configureState.value == ConfigureScreenState.DeviceIncompatible) {
+    if (configureState.value == ConfigureScreenUiState.DeviceIncompatible) {
         DeviceIncompatibleDialog(onConfirmed = {
             onUnableToConfigure()
             bluetoothViewModel.clearDialog()
         })
     }
 
-    if (configureState.value == ConfigureScreenState.PermissionConfirmed) {
+    if (configureState.value == ConfigureScreenUiState.PermissionConfirmed) {
         bluetoothViewModel.connectBluetooth(pairingLauncher)
         bluetoothViewModel.alertPairingLaunched()
     }

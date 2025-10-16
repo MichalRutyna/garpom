@@ -2,7 +2,6 @@ package mm.zamiec.garpom.ui.screens.alarms
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
@@ -30,11 +27,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.domain.model.state.AlarmOccurrence
-import mm.zamiec.garpom.domain.model.state.AlarmSummary
-import mm.zamiec.garpom.domain.model.state.AlarmsScreenState
-import mm.zamiec.garpom.domain.model.state.RecentAlarmOccurrence
-import mm.zamiec.garpom.domain.model.state.StationAlarms
+import mm.zamiec.garpom.ui.state.AlarmOccurrenceItemUiState
+import mm.zamiec.garpom.ui.state.AlarmSummaryItemUiState
+import mm.zamiec.garpom.ui.state.AlarmsUiState
+import mm.zamiec.garpom.ui.state.RecentAlarmOccurrenceItemUiState
+import mm.zamiec.garpom.ui.state.StationAlarmsItemUiState
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable
@@ -44,14 +41,14 @@ fun AlarmsScreen(
      onAlarmClicked: (String) -> Unit,
      onStationClicked: (String) -> Unit,
 ) {
-    val uiState: AlarmsScreenState by alarmsScreenViewModel.uiState.collectAsState(AlarmsScreenState())
+    val uiState: AlarmsUiState by alarmsScreenViewModel.uiState.collectAsState(AlarmsUiState())
 
     AlarmsScreenContent(uiState, onRecentAlarmOccurrenceClicked, onAlarmClicked, onStationClicked)
 }
 
 @Composable
 private fun AlarmsScreenContent(
-    uiState: AlarmsScreenState,
+    uiState: AlarmsUiState,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
     onAlarmClicked: (String) -> Unit,
     onStationClicked: (String) -> Unit,
@@ -194,32 +191,32 @@ private fun AlarmsScreenContent(
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    val uiState = AlarmsScreenState(
+    val uiState = AlarmsUiState(
         listOf(
-            StationAlarms(
+            StationAlarmsItemUiState(
                 "Test station",
                 alarmList = listOf(
-                    AlarmSummary(
+                    AlarmSummaryItemUiState(
                         "",
                         "Test alarm",
                         true
                     ),
-                    AlarmSummary(
+                    AlarmSummaryItemUiState(
                         "",
                         "Test alarm",
                         true
                     ),
-                    AlarmSummary(
+                    AlarmSummaryItemUiState(
                         "",
                         "Test alarm",
                         true
                     ),
                 )
             ),
-            StationAlarms(
+            StationAlarmsItemUiState(
                 "Test station",
                 alarmList = listOf(
-                    AlarmSummary(
+                    AlarmSummaryItemUiState(
                         "",
                         "Test alarm",
                         true
@@ -228,13 +225,13 @@ fun Preview() {
             ),
         ),
         listOf(
-            RecentAlarmOccurrence(
+            RecentAlarmOccurrenceItemUiState(
                 "Test alarm",
                 ""
             )
         ),
         listOf(
-            AlarmOccurrence(
+            AlarmOccurrenceItemUiState(
                 "Test alarm",
                 ""
             )

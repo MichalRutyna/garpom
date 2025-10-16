@@ -1,30 +1,26 @@
 package mm.zamiec.garpom.ui.screens.station
 
 import androidx.lifecycle.ViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import mm.zamiec.garpom.controller.auth.AuthRepository
-import mm.zamiec.garpom.domain.model.state.StationScreenState
-import mm.zamiec.garpom.domain.usecase.StationDetailsUseCase
+import mm.zamiec.garpom.data.auth.AuthRepository
+import mm.zamiec.garpom.ui.state.StationScreenUiState
+import mm.zamiec.garpom.domain.managers.StationDetailsManager
 
 @HiltViewModel(assistedFactory = StationViewModel.Factory::class)
 class StationViewModel @AssistedInject constructor(
     private val repository: AuthRepository,
-    private val stationDetailsUseCase: StationDetailsUseCase,
+    private val stationDetailsManager: StationDetailsManager,
     @Assisted private val stationId: String,
 ) : ViewModel() {
 
     private val TAG = "StationViewModel"
 
-    val uiState: Flow<StationScreenState> =
-        stationDetailsUseCase.stationDetails(stationId)
+    val uiState: Flow<StationScreenUiState> =
+        stationDetailsManager.stationDetails(stationId)
 
     @AssistedFactory
     interface Factory {
