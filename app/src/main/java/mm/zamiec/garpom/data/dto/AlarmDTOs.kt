@@ -1,7 +1,7 @@
 package mm.zamiec.garpom.data.dto
 
 import com.google.firebase.Timestamp
-import mm.zamiec.garpom.ui.state.measurement.Parameter
+import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
 
 
@@ -26,7 +26,6 @@ data class AlarmDto (
     val id: String,
     val name: String,
     val description: String,
-    val stationId: String,
+    val stations: List<String>,
     val active: Boolean,
-    val conditions: List<AlarmConditionDto>
 )

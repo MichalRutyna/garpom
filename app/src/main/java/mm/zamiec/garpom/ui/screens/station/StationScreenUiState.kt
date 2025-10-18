@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.state
+package mm.zamiec.garpom.ui.screens.station
 
 import android.icu.text.SimpleDateFormat
 import androidx.compose.material.icons.Icons
@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.google.firebase.Timestamp
 import java.time.Instant
 import java.util.Date
 import java.util.Locale

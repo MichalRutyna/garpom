@@ -1,16 +1,14 @@
-package mm.zamiec.garpom.ui.state.measurement
+package mm.zamiec.garpom.ui.screens.measurement
 
-enum class Parameter(val title: String, val unit: String, val dbName: String) {
-    TEMPERATURE("Temperature", "°C", "temperature"),
-    AIR_HUMIDITY("Air humidity", "%", "air_humidity"),
-    CO("CO", "ppm", "co"),
-    GROUND_HUMIDITY("Ground humidity", "%", "ground_humidity"),
-    LIGHT("Light level", " lumen", "light"),
-    PH("Ground pH", "pH", "ph"),
-    PRESSURE("Air pressure", "bar", "pressure")
-}
+import mm.zamiec.garpom.domain.model.Parameter
 
 
+open class MeasurementCard(
+    val title: String,
+    val value: Double,
+    val unit: String,
+    val triggeredAlarms: List<TriggeredAlarm>
+)
 
 class MeasurementCardFactory {
     companion object {

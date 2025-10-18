@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.state
+package mm.zamiec.garpom.ui.screens.home
 
 data class StationSummaryItemUiState(
     val stationId: String = "",

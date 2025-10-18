@@ -16,15 +16,15 @@ import kotlinx.coroutines.flow.onEach
 import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
-import mm.zamiec.garpom.ui.state.AlarmOccurrenceItemUiState
-import mm.zamiec.garpom.ui.state.RecentAlarmOccurrenceItemUiState
+import mm.zamiec.garpom.ui.screens.alarms.AlarmOccurrenceItemUiState
+import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
 import mm.zamiec.garpom.di.ApplicationScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
 @Singleton
-class AlarmOccurrencesListMenager @Inject constructor (
+class AlarmOccurrencesListManager @Inject constructor (
     @param:ApplicationScope private val scope: CoroutineScope,
     authRepository: AuthRepository,
 

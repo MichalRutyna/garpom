@@ -17,8 +17,8 @@ import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
-import mm.zamiec.garpom.ui.state.AlarmSummaryItemUiState
-import mm.zamiec.garpom.ui.state.StationAlarmsItemUiState
+import mm.zamiec.garpom.ui.screens.alarms.AlarmSummaryItemUiState
+import mm.zamiec.garpom.ui.screens.alarms.StationAlarmsItemUiState
 import mm.zamiec.garpom.di.ApplicationScope
 import java.time.Instant
 import java.time.temporal.ChronoUnit

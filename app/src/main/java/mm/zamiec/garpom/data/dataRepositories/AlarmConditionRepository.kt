@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import mm.zamiec.garpom.data.dto.AlarmConditionDto
 import mm.zamiec.garpom.domain.model.AlarmCondition
-import mm.zamiec.garpom.ui.state.measurement.Parameter
+import mm.zamiec.garpom.domain.model.Parameter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,6 +62,27 @@ class AlarmConditionRepository @Inject constructor() {
                         }
 
                     trySend(item).isSuccess
+                }
+            awaitClose { listener.remove() }
+        }
+
+    fun getConditionsByAlarm(alarmId: String): Flow<List<AlarmCondition>> =
+        callbackFlow {
+            val listener: ListenerRegistration = db.collection("alarms")
+                .document(alarmId)
+                .collection("conditions")
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        close(error)
+                        return@addSnapshotListener
+                    }
+
+                    val items = snapshot?.documents
+                        ?.mapNotNull { dtoMapper(it) }
+                        ?.mapNotNull { domainMapper(it) }
+                        .orEmpty()
+
+                    trySend(items).isSuccess
                 }
             awaitClose { listener.remove() }
         }

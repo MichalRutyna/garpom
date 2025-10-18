@@ -1,4 +1,6 @@
-package mm.zamiec.garpom.ui.state
+package mm.zamiec.garpom.ui.screens.alarms
+
+import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
 
 data class AlarmsUiState (
     val stationAlarmsList: List<StationAlarmsItemUiState> = emptyList(),

@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import mm.zamiec.garpom.data.auth.AuthRepository
-import mm.zamiec.garpom.ui.state.measurement.MeasurementScreenState
 import mm.zamiec.garpom.domain.managers.MeasurementDetailsManager
 
 @HiltViewModel(assistedFactory = MeasurementScreenViewModel.Factory::class)
@@ -32,9 +31,9 @@ class MeasurementScreenViewModel @AssistedInject constructor(
     }
 
     private fun loadMeasurement() {
+        _uiState.value = MeasurementScreenState.Loading
         viewModelScope.launch {
-            _uiState.value = MeasurementScreenState.Loading
-            val snapshot = this@MeasurementScreenViewModel.measurementDetailsManager.measurementDetailsSnapshot(measurementId)
+            val snapshot = measurementDetailsManager.measurementDetailsSnapshot(measurementId)
             _uiState.value = snapshot
         }
     }

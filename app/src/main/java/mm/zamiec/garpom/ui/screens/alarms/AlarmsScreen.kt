@@ -27,11 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.ui.state.AlarmOccurrenceItemUiState
-import mm.zamiec.garpom.ui.state.AlarmSummaryItemUiState
-import mm.zamiec.garpom.ui.state.AlarmsUiState
-import mm.zamiec.garpom.ui.state.RecentAlarmOccurrenceItemUiState
-import mm.zamiec.garpom.ui.state.StationAlarmsItemUiState
+import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable

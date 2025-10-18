@@ -30,7 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
-import mm.zamiec.garpom.ui.state.ConfigureScreenUiState
+import mm.zamiec.garpom.ui.screens.configure.ConfigureScreenUiState
 
 val TAG = "ConfigureScreen"
 

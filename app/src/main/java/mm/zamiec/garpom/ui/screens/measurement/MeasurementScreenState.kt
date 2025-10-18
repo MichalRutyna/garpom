@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.state.measurement
+package mm.zamiec.garpom.ui.screens.measurement
 
 import java.util.Date
 
@@ -16,14 +16,6 @@ open class MeasurementScreenState () {
 
     object Loading : MeasurementScreenState()
 }
-
-
-open class MeasurementCard(
-    val title: String,
-    val value: Double,
-    val unit: String,
-    val triggeredAlarms: List<TriggeredAlarm>
-)
 
 data class TriggeredAlarm(
     val alarmId: String,

@@ -10,9 +10,9 @@ import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.data.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
-import mm.zamiec.garpom.ui.state.MeasurementSummaryItemUiState
-import mm.zamiec.garpom.ui.state.NotificationItemUiState
-import mm.zamiec.garpom.ui.state.StationScreenUiState
+import mm.zamiec.garpom.ui.screens.station.MeasurementSummaryItemUiState
+import mm.zamiec.garpom.ui.screens.station.NotificationItemUiState
+import mm.zamiec.garpom.ui.screens.station.StationScreenUiState
 import javax.inject.Inject
 import javax.inject.Singleton
 

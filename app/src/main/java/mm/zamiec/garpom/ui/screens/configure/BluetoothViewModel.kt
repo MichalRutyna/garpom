@@ -23,7 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.ui.state.ConfigureScreenUiState
+import mm.zamiec.garpom.ui.screens.configure.ConfigureScreenUiState
 import java.util.concurrent.Executor
 import javax.inject.Inject
 

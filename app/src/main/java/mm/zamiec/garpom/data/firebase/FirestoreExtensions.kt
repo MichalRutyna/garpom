@@ -65,6 +65,17 @@ fun <T, D> FirebaseFirestore.filteredCollectionAsFlow(
 ): Flow<List<D>> =
     queryAsFlow(collection(collectionPath).whereEqualTo(field, value), dtoMapper, domainMapper)
 
+
+fun <T, D> FirebaseFirestore.filteredArrayContainsCollectionAsFlow(
+    collectionPath: String,
+    arrayField: String,
+    value: Any,
+    dtoMapper: (doc: DocumentSnapshot) -> T?,
+    domainMapper: (dto: T) -> D?,
+): Flow<List<D>> =
+    queryAsFlow(collection(collectionPath).whereArrayContains(arrayField, value), dtoMapper, domainMapper)
+
+
 fun <T, D> FirebaseFirestore.collectionByIdsAsFlow(
     collectionPath: String,
     ids: List<String>,

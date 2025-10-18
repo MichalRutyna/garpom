@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
-import mm.zamiec.garpom.ui.state.StationSummaryItemUiState
+import mm.zamiec.garpom.ui.screens.home.StationSummaryItemUiState
 import mm.zamiec.garpom.di.ApplicationScope
 import javax.inject.Inject
 import javax.inject.Singleton

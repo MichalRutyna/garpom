@@ -1,6 +1,6 @@
 package mm.zamiec.garpom.domain.model
 
-import mm.zamiec.garpom.ui.state.measurement.Parameter
+import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -36,7 +36,7 @@ data class Alarm (
     val id: String,
     val name: String,
     val description: String,
-    val stationId: String,
     val active: Boolean,
-    val conditions: List<AlarmCondition>
+    val conditions: List<AlarmCondition>,
+    val stations: List<String>,
 )

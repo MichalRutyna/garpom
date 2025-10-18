@@ -28,6 +28,7 @@ import mm.zamiec.garpom.ui.navigation.BottomNavDestination
 import mm.zamiec.garpom.ui.navigation.MeasurementScreen
 import mm.zamiec.garpom.ui.navigation.Station
 import mm.zamiec.garpom.ui.navigation.StationConfig
+import mm.zamiec.garpom.ui.screens.alarm_config.AlarmConfigScreen
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
 import mm.zamiec.garpom.ui.screens.auth.AuthRouteController
@@ -97,7 +98,7 @@ class Nav3Activity : ComponentActivity() {
                                     backStack.add(MeasurementScreen(measurementId))
                                 },
                                 onAlarmClicked = { alarmId ->
-                                    // TODO go to alarm config
+                                    backStack.add(AlarmConfig(alarmId))
                                 },
                                 onStationClicked = { stationId ->
                                     backStack.add(Station(stationId))
@@ -105,7 +106,12 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<AlarmConfig> { key ->
-                            // TODO alarm config
+                            AlarmConfigScreen(
+                                alarmId = key.id,
+                                onBack = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
                         entry<BottomNavDestination.Configure> {
                             ConfigureScreen(

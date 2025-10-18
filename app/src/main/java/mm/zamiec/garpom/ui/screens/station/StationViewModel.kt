@@ -7,7 +7,6 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import mm.zamiec.garpom.data.auth.AuthRepository
-import mm.zamiec.garpom.ui.state.StationScreenUiState
 import mm.zamiec.garpom.domain.managers.StationDetailsManager
 
 @HiltViewModel(assistedFactory = StationViewModel.Factory::class)

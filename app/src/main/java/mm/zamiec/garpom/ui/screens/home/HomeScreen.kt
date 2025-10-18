@@ -26,8 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.ui.state.HomeUiState
-import mm.zamiec.garpom.ui.state.StationSummaryItemUiState
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @Composable

@@ -37,11 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import mm.zamiec.garpom.ui.state.measurement.FireCard
-import mm.zamiec.garpom.ui.state.measurement.MeasurementCardFactory
-import mm.zamiec.garpom.ui.state.measurement.MeasurementScreenState
-import mm.zamiec.garpom.ui.state.measurement.Parameter
-import mm.zamiec.garpom.ui.state.measurement.TriggeredAlarm
+import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
 import java.util.Date
 import java.util.Locale
