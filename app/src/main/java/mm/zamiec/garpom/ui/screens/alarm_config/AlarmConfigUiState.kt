@@ -20,8 +20,9 @@ open class AlarmConfigUiState() {
 
     object Loading : AlarmConfigUiState()
 }
-class StationChoice (
+data class StationChoice (
     val stationId: String,
     val stationName: String,
-    val hasThisAlarm: Boolean,
-)
+    var hasThisAlarm: Boolean,
+) {
+}

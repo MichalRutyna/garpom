@@ -1,7 +1,8 @@
 package mm.zamiec.garpom.ui.screens.alarm_config
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,35 +11,44 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import mm.zamiec.garpom.domain.model.Parameter
+import mm.zamiec.garpom.ui.screens.alarm_config.components.ActiveTimePicker
+import mm.zamiec.garpom.ui.screens.alarm_config.components.ParameterCardContent
+import mm.zamiec.garpom.ui.screens.alarm_config.components.SelectAdditionalStationDialog
+import mm.zamiec.garpom.ui.screens.alarm_config.components.TitleBar
 import java.time.Instant
+import java.util.Calendar
 import java.util.Date
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AlarmConfigScreen(
     alarmId: String,
@@ -58,8 +68,7 @@ fun AlarmConfigScreen(
             AlarmConfigContent(
                 uiState as AlarmConfigUiState.ConfigData,
                 onBack,
-                {} //TODO
-            )
+                {}) //TODO
         }
         is AlarmConfigUiState.Error ->
         {}
@@ -67,169 +76,161 @@ fun AlarmConfigScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlarmConfigContent(
     uiState: AlarmConfigUiState.ConfigData,
     onBack: () -> Unit,
     onSave: () -> Unit,
     ) {
+    // state to save
+    var alarmActiveState by remember { mutableStateOf(uiState.alarmActive) }
 
-    LazyColumn {
-        item() {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .fillMaxWidth()
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                    "Show details",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.align(Alignment.CenterStart).scale(1.3f)
-                        .clickable(onClick = onBack)
-                )
-                BasicText(
-                    text = uiState.alarmName,
-                    style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
-                    maxLines = 1,
-                    modifier = Modifier.padding(start = 5.dp, top = 5.dp, end = 5.dp),
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 10.sp,
-                        maxFontSize = 40.sp,
-                        stepSize = 2.sp
-                    ),
-                )
+    val startTimePickerState = rememberTimePickerState(
+        initialHour = Calendar.Builder().setInstant(uiState.alarmStart).build().get(Calendar.HOUR_OF_DAY),
+        initialMinute = Calendar.Builder().setInstant(uiState.alarmStart).build().get(Calendar.MINUTE),
+        is24Hour = true,
+    )
+    val endTimePickerState = rememberTimePickerState(
+        initialHour = Calendar.Builder().setInstant(uiState.alarmEnd).build().get(Calendar.HOUR_OF_DAY),
+        initialMinute = Calendar.Builder().setInstant(uiState.alarmEnd).build().get(Calendar.MINUTE),
+        is24Hour = true,
+    )
 
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.inversePrimary)
+    val stationThatUseThisAlarmState = remember(uiState.userStations) {
+        mutableStateListOf<StationChoice>().apply { addAll(uiState.userStations.filter { it.hasThisAlarm }) }
+    }
 
-            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
-        }
-        item() {
-            HorizontalDivider()
-            Column (
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    "Active between:",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Row {
-                    Text("start")
-                    Text(" : ")
-                    Text("end")
-                }
-            }
-            HorizontalDivider()
-            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 3.dp))
-        }
-        item() {
-            HorizontalDivider()
-            Column (
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    "Stations:",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Row {
-                }
-            }
-            HorizontalDivider()
-            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-        }
-        item() {
-            Text("Select desired ranges:",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center)
-        }
-        items(uiState.cards) { card: ParameterRangeCard ->
-            var sliderPosition by remember {
-                mutableStateOf(
-                    card.startValue.toFloat()..card.endValue.toFloat()
-                ) }
-
-            HorizontalDivider()
-            Column (
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(contentAlignment = Alignment.CenterStart) {
-                    Column {
-                        Text(
-                            card.title,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            "",
-                            Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        RangeSlider (
-                            value = sliderPosition,
-//                            steps = 20,
-                            onValueChange = { range -> sliderPosition = range },
-                            valueRange = card.minValue.toFloat()..card.maxValue.toFloat(),
-                            onValueChangeFinished = {}
-
-                        )
-                        var text = ""
-                        if (sliderPosition.start !in listOf(Float.NEGATIVE_INFINITY, card.minValue.toFloat())) {
-                            if (sliderPosition.endInclusive !in listOf(Float.POSITIVE_INFINITY, card.maxValue.toFloat())) {
-                                // both
-                                text += "This alarm will go off for ${card.descriptionParameterName}" +
-                                        " below ${String.format("%.1f", sliderPosition.start)}${card.unit}," +
-                                        " or above ${String.format("%.1f", sliderPosition.endInclusive)}${card.unit}"
-                            }
-                            else {
-                                //only below
-                                text += "This alarm will go off for ${card.descriptionParameterName}" +
-                                        " below ${String.format("%.1f", sliderPosition.start)}${card.unit}"
-                            }
-                        }
-                        else {
-                            if (sliderPosition.endInclusive !in listOf(Float.POSITIVE_INFINITY, card.maxValue.toFloat())) {
-                                // only above
-                                text += "This alarm will go off for ${card.descriptionParameterName}" +
-                                        " above ${String.format("%.1f", sliderPosition.endInclusive)}${card.unit}"
-                            }
-                            else {
-                                // none
-                                text += "This alarm will not measure ${card.descriptionParameterName}"
-                            }
-                        }
-
-
-                        Text(
-                            text,
-                            Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                    }
-                }
-            }
-            HorizontalDivider()
-            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
+    val sliderPositionsState: Map<String, MutableState<ClosedFloatingPointRange<Float>>> = remember {
+        uiState.cards.associate { card ->
+            card.title to mutableStateOf(card.startValue.toFloat()..card.endValue.toFloat())
         }
     }
+
+    Scaffold (
+        topBar = {
+            TitleBar(onBack, uiState)
+        },
+        floatingActionButton = {
+            FloatingActionButton({
+                // TODO
+            }) {
+                Icon(Icons.Filled.Done, "Save the alarm.")
+            }
+        }
+    ) { paddingValues ->
+        LazyColumn (Modifier.padding(paddingValues)) {
+            item() {
+                Row(
+                    modifier = Modifier.Companion
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val activeFieldText = if (alarmActiveState == uiState.alarmActive) {
+                        if (alarmActiveState) "This alarm is enabled" else "This alarm is disabled"
+                    } else
+                        if (alarmActiveState) "This alarm will be enabled" else "This alarm will be disabled"
+                    Text(
+                        activeFieldText,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Switch(
+                        checked = alarmActiveState,
+                        onCheckedChange = {
+                            alarmActiveState = it
+                        },
+    //                    modifier = Modifier.scale(0.5f)
+                    )
+                }
+                HorizontalDivider()
+                Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
+            }
+            item() {
+                ActiveTimePicker(
+                    startTimePickerState,
+                    endTimePickerState
+                )
+            }
+            item() {
+                HorizontalDivider()
+                Column (
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        "Stations that use this alarm:",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                HorizontalDivider()
+            }
+            items(stationThatUseThisAlarmState) { stationChoice ->
+                Row (
+                    Modifier.padding(horizontal = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stationChoice.stationName, Modifier.weight(1f))
+
+                    Switch(
+                        checked = stationThatUseThisAlarmState
+                            .find { it.stationId == stationChoice.stationId }
+                            ?.hasThisAlarm ?: return@items,
+                        onCheckedChange = { isChecked ->
+                            val index = stationThatUseThisAlarmState.indexOfFirst { it.stationId == stationChoice.stationId }
+                            if (index != -1) {
+                                stationThatUseThisAlarmState[index] = stationChoice.copy(hasThisAlarm = isChecked)
+                            }
+                        }
+                    )
+                }
+                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+            }
+            item() {
+                var addStationDialogShown by remember { mutableStateOf(false) }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(5.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    SmallFloatingActionButton(onClick = {
+                        addStationDialogShown = true
+                    }) {
+                        Icon(Icons.Filled.Add, "Add this alarm to another station.")
+                    }
+                }
+                if (addStationDialogShown)
+                    SelectAdditionalStationDialog(uiState.userStations
+                        .filter {choice -> !choice.hasThisAlarm && !stationThatUseThisAlarmState.any{it.stationId == choice.stationId}},
+                        { selections ->
+                            stationThatUseThisAlarmState.addAll(
+                                selections
+                                    .filter { it.hasThisAlarm }
+                            )
+                            addStationDialogShown = false
+                        },
+                        {addStationDialogShown = false})
+                Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
+            }
+            item() {
+                Text("Select desired ranges:",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center)
+            }
+            items(uiState.cards) { card: ParameterRangeCard ->
+                ParameterCardContent(sliderPositionsState, card)
+            }
+        }
+
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -241,13 +242,18 @@ private fun Preview() {
         alarmName = "Test alarm",
         userStations = listOf(
             StationChoice(
-                stationId = "",
+                stationId = "1",
                 stationName = "Test station",
                 hasThisAlarm = true
             ),
             StationChoice(
-                stationId = "",
-                stationName = "Test station 2",
+                stationId = "2",
+                stationName = "Test station2",
+                hasThisAlarm = true
+            ),
+            StationChoice(
+                stationId = "3",
+                stationName = "Test station 3",
                 hasThisAlarm = false
             ),
         ),
