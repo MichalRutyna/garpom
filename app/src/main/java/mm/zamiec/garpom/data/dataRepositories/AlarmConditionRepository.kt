@@ -34,10 +34,18 @@ class AlarmConditionRepository @Inject constructor() {
         val type = Parameter.entries.find { it.dbName == dto.parameter } ?: return null
 
         return AlarmCondition(
-            id = dto.id,
             parameter = type,
-            triggerLevel = dto.triggerLevel,
-            triggerOnHigher = dto.triggerOnHigher,
+            triggerLevel = dto.trigger_level,
+            triggerOnHigher = dto.trigger_on_higher,
+        )
+    }
+
+    fun conditionDomainToDto(domain: AlarmCondition): AlarmConditionDto {
+        return AlarmConditionDto(
+            id = "", // not used
+            parameter = domain.parameter.dbName,
+            trigger_level = domain.triggerLevel,
+            trigger_on_higher = domain.triggerOnHigher
         )
     }
 

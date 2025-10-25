@@ -24,7 +24,7 @@ import mm.zamiec.garpom.ui.screens.alarm_config.AlarmConfigUiState
 @Composable
 fun TitleBar(
     onBack: () -> Unit,
-    uiState: AlarmConfigUiState.ConfigData
+    name: String
 ) {
     Box(
         contentAlignment = Alignment.Companion.Center,
@@ -43,7 +43,7 @@ fun TitleBar(
                 .clickable(onClick = onBack)
         )
         BasicText(
-            text = uiState.alarmName,
+            text = name,
             style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
             maxLines = 1,
             modifier = Modifier.Companion.padding(start = 5.dp, top = 5.dp, end = 5.dp),

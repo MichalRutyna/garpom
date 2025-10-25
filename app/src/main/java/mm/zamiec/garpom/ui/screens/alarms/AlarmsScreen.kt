@@ -1,5 +1,6 @@
 package mm.zamiec.garpom.ui.screens.alarms
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -52,11 +53,12 @@ private fun AlarmsScreenContent(
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        item() {
+        item {
             Text(
                 "Your alarms:",
                 Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .padding(10.dp),
                 style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center
@@ -64,7 +66,7 @@ private fun AlarmsScreenContent(
             HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
         uiState.stationAlarmsList.forEach {
-            item() {
+            item {
                 Row(
                     Modifier
                         .padding(10.dp).padding(end = 10.dp)
@@ -112,15 +114,16 @@ private fun AlarmsScreenContent(
                 HorizontalDivider(Modifier.padding(horizontal = 20.dp))
             }
         }
-        item () {
+        item {
             Spacer(Modifier.height(50.dp))
 
             Text(
-                "Recent alarm occurrences:",
+                "Recent alarm occurrences (last 7 days):",
                 Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .padding(10.dp),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center
             )
             HorizontalDivider(Modifier.padding(horizontal = 10.dp))
@@ -147,13 +150,14 @@ private fun AlarmsScreenContent(
             HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
 
-        item() {
+        item {
             Spacer(Modifier.height(50.dp))
 
             Text(
                 "All alarm occurrences:",
                 Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .padding(10.dp),
                 style = MaterialTheme.typography.headlineLarge,
                 textAlign = TextAlign.Center

@@ -55,7 +55,7 @@ fun ActiveTimePicker(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedTextField(
-                value = "${startTimePickerState.hour}:${String.format(Locale.getDefault(), "%02d", endTimePickerState.minute)}",
+                value = "${startTimePickerState.hour}:${String.format(Locale.getDefault(), "%02d", startTimePickerState.minute)}",
                 onValueChange = { },
                 readOnly = true,
                 trailingIcon = {
