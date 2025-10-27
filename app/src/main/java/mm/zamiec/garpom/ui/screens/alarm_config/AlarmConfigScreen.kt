@@ -2,6 +2,7 @@ package mm.zamiec.garpom.ui.screens.alarm_config
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -123,11 +124,10 @@ fun AlarmConfigContent(
         mutableStateListOf<StationChoice>().apply { addAll(uiState.userStations.filter { it.hasThisAlarm }) }
     }
 
-    val sliderPositionsState: Map<String, MutableState<ClosedFloatingPointRange<Float>>> = remember {
-        uiState.cards.associate { card ->
-            card.title to mutableStateOf(card.startValue.toFloat()..card.endValue.toFloat())
+    var sliderPositionsState: Map<String, MutableState<ClosedFloatingPointRange<Float>>> =
+        remember {
+            cardsToMap(uiState)
         }
-    }
 
     Scaffold (
         topBar = {
@@ -178,7 +178,25 @@ fun AlarmConfigContent(
                 Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
             }
             item {
-                SelectRagesTitle()
+                Row (
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                ) {
+                    Text(
+                        "Select desired ranges:",
+                        style = MaterialTheme.typography.headlineMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = {
+                        cardsToMap(uiState).forEach { t, u ->
+                            sliderPositionsState[t]?.value = u.value
+                        }
+                    }) {
+                        Text("Reset")
+                    }
+                }
             }
             items(uiState.cards) { card: ParameterRangeCard ->
                 ParameterCardContent(sliderPositionsState, card)
@@ -188,14 +206,16 @@ fun AlarmConfigContent(
     }
 }
 
+private fun cardsToMap(uiState: AlarmConfigUiState.ConfigData): Map<String, MutableState<ClosedFloatingPointRange<Float>>> =
+    uiState.cards.associate { card ->
+        card.title to mutableStateOf(card.startValue.toFloat()..card.endValue.toFloat())
+    }
+
 @Composable
 private fun SelectRagesTitle() {
-    Text(
-        "Select desired ranges:",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center
-    )
+    Row {
+
+    }
 }
 
 @Composable

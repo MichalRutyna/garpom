@@ -100,6 +100,9 @@ class Nav3Activity : ComponentActivity() {
                                 onAlarmClicked = { alarmId ->
                                     backStack.add(AlarmConfig(alarmId))
                                 },
+                                onCreateAlarmClicked = {
+                                    backStack.add(AlarmConfig(""))
+                                },
                                 onStationClicked = { stationId ->
                                     backStack.add(Station(stationId))
                                 }

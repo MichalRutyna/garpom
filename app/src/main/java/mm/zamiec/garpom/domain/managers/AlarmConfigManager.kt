@@ -53,21 +53,11 @@ class AlarmConfigManager @Inject constructor(
                 }
             }
 
-            val stationChoices = stationRepository
-                .getStationsByOwner(authRepository.currentUser.value.id)
-                .first()
-                .map { station ->
-                    StationChoice(
-                        station.id,
-                        station.name,
-                        hasThisAlarm = alarm.stations.contains(station.id)
-                    )
-                }
+            val stationChoices = userStationsWithAlarm(alarm)
 
-            Log.d("ConfigMenager", rangesMap.toString())
             return AlarmConfigUiState.ConfigData(
                 alarmId = alarm.id,
-                createAlarm = alarmId == "",
+                createAlarm = false,
                 alarmName = alarm.name,
                 alarmDescription = alarm.description,
                 alarmEnabled = alarm.active,
@@ -83,6 +73,39 @@ class AlarmConfigManager @Inject constructor(
         } catch (e: Exception) {
             AlarmConfigUiState.Error(e.message ?: "Unknown error")
         }
+    }
+
+    suspend fun getNewAlarmState(): AlarmConfigUiState {
+        return try {
+            val stations = stationRepository
+                .getStationsByOwner(authRepository.currentUser.value.id)
+                .first()
+                .map { station ->
+                    StationChoice(
+                        station.id,
+                        station.name,
+                        hasThisAlarm = false
+                    )
+                }
+
+            val state = AlarmConfigUiState.ConfigData(userStations = stations)
+            return state
+        } catch (e: Exception) {
+            AlarmConfigUiState.Error(e.message ?: "Unknown error")
+        }
+    }
+    private suspend fun userStationsWithAlarm(alarm: Alarm): List<StationChoice> {
+        val stationChoices = stationRepository
+            .getStationsByOwner(authRepository.currentUser.value.id)
+            .first()
+            .map { station ->
+                StationChoice(
+                    station.id,
+                    station.name,
+                    hasThisAlarm = alarm.stations.contains(station.id)
+                )
+            }
+        return stationChoices
     }
 
     suspend fun saveUiState(state: AlarmConfigUiState.ConfigData) {
