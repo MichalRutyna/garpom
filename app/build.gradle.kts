@@ -101,6 +101,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation("io.github.ehsannarmani:compose-charts:0.2.0")
+    implementation(libs.androidx.compose.material.icons.core)
+
 
 }
 
