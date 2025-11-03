@@ -24,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import mm.zamiec.garpom.domain.model.Parameter
+import mm.zamiec.garpom.ui.screens.measurement.components.FireCard
+import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCard
+import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCardFactory
 import java.time.Instant
 import java.util.Date
 import java.util.Locale
@@ -81,149 +85,184 @@ private fun MeasurementDataScreen(
     onAlarmClick: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    Column {
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .fillMaxWidth()
-        ) {
-            Icon(
-                Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                "Show details",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.scale(1.3f)
-                    .clickable(onClick = onBack)
-                )
-            BasicText(
-                text = uiState.stationName + " measurement",
-                style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
-                maxLines = 1,
-                modifier = Modifier.padding(start = 5.dp, top = 5.dp, end = 5.dp),
-                autoSize = TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = 40.sp, stepSize = 2.sp),
-            )
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.inversePrimary)
-
-        Row (horizontalArrangement = Arrangement.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 10.dp)
-        ) {
-            Text(
-                text = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", Locale.getDefault())
-                    .format(uiState.date)
-                    .replaceFirstChar {
-                        it.uppercaseChar()
-                    },
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-
-
+    Scaffold (
+        topBar = { TopBar(onBack, uiState) }
+    ) { paddingValues ->
         LazyColumn (
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            item {
+                DateSubtitle(uiState)
+                Spacer(Modifier.padding(top = 10.dp))
+            }
             items(uiState.cards) { card ->
-                HorizontalDivider()
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
+                MeasurementCard(card, onAlarmClick)
+                Spacer(Modifier.padding(top = 10.dp))
+            }
+            item {
+                FireCard(uiState)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FireCard(uiState: MeasurementScreenState.MeasurementData) {
+    HorizontalDivider()
+    if (uiState.fire.value) {
+        Box(
+            modifier = Modifier
+                .background(Color.Red.copy(alpha = 0.4f))
+                .fillMaxWidth()
+                .padding(10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Rounded.Warning,
+                    "FIRE!"
+                )
+                Text("Station detected a fire!")
+            }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .fillMaxWidth()
+                .padding(10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Rounded.CheckCircle,
+                    "All good"
+                )
+                Text("No fire detected! ")
+            }
+        }
+    }
+    HorizontalDivider()
+}
+
+@Composable
+private fun MeasurementCard(
+    card: MeasurementCard,
+    onAlarmClick: (String) -> Unit
+) {
+    HorizontalDivider()
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
+        Column {
+            Text(
+                card.title,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Box(contentAlignment = Alignment.CenterStart) {
+                if (card.triggeredAlarms.isEmpty()) {
+                    Icon(
+                        Icons.Rounded.Check,
+                        "Ok",
+                        modifier = Modifier.padding(start = 15.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                } else {
                     Column {
-                        Text(
-                            card.title,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Box(contentAlignment = Alignment.CenterStart) {
-                            if (card.triggeredAlarms.isEmpty()) {
+                        for (alarm in card.triggeredAlarms) {
+                            Row(
+                                Modifier.clickable(onClick = {
+                                    onAlarmClick(alarm.alarmId)
+                                }),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Icon(
-                                    Icons.Rounded.Check,
-                                    "Ok",
-                                    modifier = Modifier.padding(start = 15.dp),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    Icons.Rounded.Warning,
+                                    "Alarm",
+                                    tint = MaterialTheme.colorScheme.error
                                 )
-                            } else {
-                                Column {
-                                    for (alarm in card.triggeredAlarms) {
-                                        Row (Modifier.clickable(onClick = {
-                                            onAlarmClick(alarm.alarmId)
-                                        }),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.Warning,
-                                                "Alarm",
-                                                tint = MaterialTheme.colorScheme.error
-                                            )
-                                            Text(alarm.alarmName,
-                                                color = MaterialTheme.colorScheme.error)
-                                        }
-                                    }
-                                }
+                                Text(
+                                    alarm.alarmName,
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
-
-                            Text(
-                                "" + card.value + card.unit,
-                                Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-
                         }
                     }
                 }
-                HorizontalDivider()
-            }
-        }
-        Spacer(Modifier.padding(top = 10.dp))
-        HorizontalDivider()
-        if (uiState.fire.value) {
-            Box(
-                modifier = Modifier
-                    .background(Color.Red.copy(alpha = 0.4f))
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Rounded.Warning,
-                        "FIRE!"
-                    )
-                    Text("Station detected a fire!")
-                }
-            }
-        }
-        else {
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                    Icons.Rounded.CheckCircle,
-                    "All good"
-                    )
-                    Text("No fire detected! ")
-                }
-            }
-        }
 
-        HorizontalDivider()
+                Text(
+                    "" + card.value + card.unit,
+                    Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
 
+            }
+        }
     }
+    HorizontalDivider()
+}
+
+@Composable
+private fun DateSubtitle(uiState: MeasurementScreenState.MeasurementData) {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 10.dp)
+    ) {
+        Text(
+            text = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", Locale.getDefault())
+                .format(uiState.date)
+                .replaceFirstChar {
+                    it.uppercaseChar()
+                },
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
+
+@Composable
+private fun TopBar(
+    onBack: () -> Unit,
+    uiState: MeasurementScreenState.MeasurementData
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .fillMaxWidth()
+    ) {
+        Icon(
+            Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
+            "Show details",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .scale(1.3f)
+                .clickable(onClick = onBack)
+        )
+        BasicText(
+            text = uiState.stationName + " measurement",
+            style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
+            maxLines = 1,
+            modifier = Modifier.padding(start = 5.dp, top = 5.dp, end = 5.dp),
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 10.sp,
+                maxFontSize = 40.sp,
+                stepSize = 2.sp
+            ),
+        )
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.inversePrimary)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -250,13 +289,13 @@ fun Preview() {
                         "", "Test alarm"
                     ),
                     TriggeredAlarm(
-                        "", "Tt alarm2"
+                        "", "Test alarm2"
                     ),
                     TriggeredAlarm(
-                        "", "Tt alarm2"
+                        "", "Test alarm3"
                     ),
                     TriggeredAlarm(
-                        "", "Tt alarm2"
+                        "", "Test alarm4"
                     ),
                 )
             ),

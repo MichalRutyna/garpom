@@ -1,6 +1,7 @@
-package mm.zamiec.garpom.ui.screens.measurement
+package mm.zamiec.garpom.ui.screens.measurement.components
 
 import mm.zamiec.garpom.domain.model.Parameter
+import mm.zamiec.garpom.ui.screens.measurement.TriggeredAlarm
 
 
 open class MeasurementCard(

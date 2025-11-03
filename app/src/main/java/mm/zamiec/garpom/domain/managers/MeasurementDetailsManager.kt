@@ -8,8 +8,8 @@ import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.data.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
-import mm.zamiec.garpom.ui.screens.measurement.FireCard
-import mm.zamiec.garpom.ui.screens.measurement.MeasurementCardFactory
+import mm.zamiec.garpom.ui.screens.measurement.components.FireCard
+import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCardFactory
 import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreenState
 import mm.zamiec.garpom.domain.model.Parameter
 import mm.zamiec.garpom.ui.screens.measurement.TriggeredAlarm
