@@ -11,7 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -21,10 +21,10 @@ import java.util.Locale
 
 @Composable
 fun ParameterCardContent(
-    sliderPositions: Map<String, MutableState<ClosedFloatingPointRange<Float>>>,
+    sliderPositions: SnapshotStateMap<String, ClosedFloatingPointRange<Float>>,
     card: ParameterRangeCard
 ) {
-    var sliderPosition = sliderPositions[card.title]?.value ?: return
+    var sliderPosition = sliderPositions[card.title] ?: return
 
     HorizontalDivider()
     Column(
@@ -50,7 +50,7 @@ fun ParameterCardContent(
                     value = sliderPosition,
 //                            steps = 20,
                     onValueChange = { sliderPosition = it
-                        sliderPositions[card.title]?.value = sliderPosition },
+                        sliderPositions[card.title] = sliderPosition },
                     valueRange = card.minValue.toFloat()..card.maxValue.toFloat(),
                     onValueChangeFinished = {
                     }

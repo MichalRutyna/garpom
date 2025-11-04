@@ -11,12 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.domain.managers.MeasurementDetailsManager
 
 @HiltViewModel(assistedFactory = MeasurementScreenViewModel.Factory::class)
 class MeasurementScreenViewModel @AssistedInject constructor(
-    private val repository: AuthRepository,
     private val measurementDetailsManager: MeasurementDetailsManager,
     @Assisted private val measurementId: String,
 ) : ViewModel() {
@@ -25,6 +23,13 @@ class MeasurementScreenViewModel @AssistedInject constructor(
 
     private val _uiState = MutableStateFlow<MeasurementScreenState>(MeasurementScreenState.Loading)
     val uiState: StateFlow<MeasurementScreenState> = _uiState.asStateFlow()
+
+    private val _fabMenuExpanded = MutableStateFlow(false)
+    val fabMenuExpanded: StateFlow<Boolean> = _fabMenuExpanded
+
+    fun toggleFabMenu() {
+        _fabMenuExpanded.value = !_fabMenuExpanded.value
+    }
 
     init {
         loadMeasurement()

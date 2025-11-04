@@ -1,8 +1,6 @@
 package mm.zamiec.garpom.ui.screens.alarm_config
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,28 +12,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,12 +42,10 @@ import mm.zamiec.garpom.domain.model.Parameter
 import mm.zamiec.garpom.ui.screens.alarm_config.components.ActiveTimePicker
 import mm.zamiec.garpom.ui.screens.alarm_config.components.ParameterCardContent
 import mm.zamiec.garpom.ui.screens.alarm_config.components.SelectAdditionalStationDialog
-import mm.zamiec.garpom.ui.screens.alarm_config.components.TitleBar
 import java.time.Instant
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AlarmConfigScreen(
     alarmId: String,
@@ -64,10 +53,10 @@ fun AlarmConfigScreen(
         creationCallback = { factory: AlarmConfigScreenViewModel.Factory ->
             factory.create(alarmId)
         }
-    ),
-    onBack: () -> Unit,
+    )
 ) {
     val uiState: AlarmConfigUiState by alarmConfigViewModel.uiState.collectAsState()
+    val temporaryState by alarmConfigViewModel.editState.collectAsState()
 
     when (uiState) {
         is AlarmConfigUiState.Loading ->
@@ -75,8 +64,9 @@ fun AlarmConfigScreen(
         is AlarmConfigUiState.ConfigData -> {
             AlarmConfigContent(
                 uiState as AlarmConfigUiState.ConfigData,
-                onBack,
-                alarmConfigViewModel::saveStates)
+                temporaryState,
+                alarmConfigViewModel::resetSliders
+                )
         }
         is AlarmConfigUiState.Error ->
             { AlarmConfigErrorScreen(uiState as AlarmConfigUiState.Error) }
@@ -103,116 +93,90 @@ private fun AlarmConfigLoadingScreen() {
 @Composable
 fun AlarmConfigContent(
     uiState: AlarmConfigUiState.ConfigData,
-    onBack: () -> Unit,
-    onSave: (Boolean, String, String, TimePickerState, TimePickerState, SnapshotStateList<StationChoice>,
-             Map<String, MutableState<ClosedFloatingPointRange<Float>>>) -> Unit,
-    ) {
-    val alarmActiveState = remember { mutableStateOf(uiState.alarmEnabled) }
-
-    val alarmNameState = remember { mutableStateOf(uiState.alarmName) }
-
-    val alarmDescriptionState = remember { mutableStateOf(uiState.alarmDescription) }
-
-    val startTimePickerState: TimePickerState = rememberTimePickerState(
-        initialHour = uiState.alarmStart.get(Calendar.HOUR_OF_DAY),
-        initialMinute = uiState.alarmStart.get(Calendar.MINUTE),
-        is24Hour = true,
-    )
-    val endTimePickerState: TimePickerState = rememberTimePickerState(
-        initialHour = uiState.alarmEnd.get(Calendar.HOUR_OF_DAY),
-        initialMinute = uiState.alarmEnd.get(Calendar.MINUTE),
-        is24Hour = true,
-    )
-
-    val stationUsingThisAlarmState: SnapshotStateList<StationChoice> = remember(uiState.userStations) {
-        mutableStateListOf<StationChoice>().apply { addAll(uiState.userStations.filter { it.hasThisAlarm }) }
-    }
-
-    var sliderPositionsState: Map<String, MutableState<ClosedFloatingPointRange<Float>>> =
-        remember {
-            cardsToMap(uiState)
+    temporaryState: AlarmConfigEditState,
+    resetSliders: () -> Unit
+) {
+//    val alarmActiveState = remember { mutableStateOf(uiState.alarmEnabled) }
+//
+//    val alarmNameState = remember { mutableStateOf(uiState.alarmName) }
+//
+//    val alarmDescriptionState = remember { mutableStateOf(uiState.alarmDescription) }
+//
+//    val startTimePickerState: TimePickerState = rememberTimePickerState(
+//        initialHour = uiState.alarmStart.get(Calendar.HOUR_OF_DAY),
+//        initialMinute = uiState.alarmStart.get(Calendar.MINUTE),
+//        is24Hour = true,
+//    )
+//    val endTimePickerState: TimePickerState = rememberTimePickerState(
+//        initialHour = uiState.alarmEnd.get(Calendar.HOUR_OF_DAY),
+//        initialMinute = uiState.alarmEnd.get(Calendar.MINUTE),
+//        is24Hour = true,
+//    )
+//
+//    val stationUsingThisAlarmState: SnapshotStateList<StationChoice> = remember(uiState.userStations) {
+//        mutableStateListOf<StationChoice>().apply { addAll(uiState.userStations.filter { it.hasThisAlarm }) }
+//    }
+//
+//    var sliderPositionsState: Map<String, MutableState<ClosedFloatingPointRange<Float>>> =
+//        remember {
+//            cardsToMap(uiState)
+//        }
+    LazyColumn {
+        item {
+            AlarmEnabledWidget(temporaryState.alarmEnabled ,uiState)
+            HorizontalDivider()
+            AlarmNameWidget(temporaryState.alarmName, uiState)
+            HorizontalDivider()
+            AlarmDescriptionWidget(temporaryState.alarmDescription, uiState)
+            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
         }
-
-    Scaffold (
-        topBar = {
-            TitleBar(onBack, alarmNameState.value)
-        },
-        floatingActionButton = {
-            FloatingActionButton({
-                onSave(
-                    alarmActiveState.value,
-                    alarmNameState.value,
-                    alarmDescriptionState.value,
-                    startTimePickerState,
-                    endTimePickerState,
-                    stationUsingThisAlarmState,
-                    sliderPositionsState,
-                )
-            }) {
-                Icon(Icons.Filled.Done, "Save the alarm.")
-            }
+        item {
+            ActiveTimePicker(
+                temporaryState.alarmStart,
+                temporaryState.alarmEnd
+            )
         }
-    ) { paddingValues ->
-        LazyColumn (Modifier.padding(paddingValues)) {
-            item {
-                AlarmEnabledWidget(alarmActiveState, uiState)
-                HorizontalDivider()
-                AlarmNameWidget(alarmNameState, uiState)
-                HorizontalDivider()
-                AlarmDescriptionWidget(alarmDescriptionState, uiState)
-                Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-            }
-            item {
-                ActiveTimePicker(
-                    startTimePickerState,
-                    endTimePickerState
+        item {
+            HorizontalDivider()
+            StationUsingThisAlarmTitle()
+            HorizontalDivider()
+        }
+        items(temporaryState.stations) { stationChoice ->
+            StationUsingThisAlarmItem(temporaryState.stations, stationChoice)
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        item {
+            AddToStationRow(temporaryState.stations, uiState)
+            Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
+        }
+        item {
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            ) {
+                Text(
+                    "Select desired ranges:",
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
                 )
-            }
-            item {
-                HorizontalDivider()
-                StationUsingThisAlarmTitle()
-                HorizontalDivider()
-            }
-            items(stationUsingThisAlarmState) { stationChoice ->
-                StationUsingThisAlarmItem(stationUsingThisAlarmState, stationChoice)
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
-            item {
-                AddToStationRow(stationUsingThisAlarmState, uiState)
-                Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 6.dp))
-            }
-            item {
-                Row (
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                ) {
-                    Text(
-                        "Select desired ranges:",
-                        style = MaterialTheme.typography.headlineMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                    Button(onClick = {
-                        cardsToMap(uiState).forEach { t, u ->
-                            sliderPositionsState[t]?.value = u.value
-                        }
-                    }) {
-                        Text("Reset")
-                    }
+                Button(onClick = {
+                   resetSliders()
+                }) {
+                    Text("Reset")
                 }
             }
-            items(uiState.cards) { card: ParameterRangeCard ->
-                ParameterCardContent(sliderPositionsState, card)
-            }
         }
-
+        items(uiState.cards) { card: ParameterRangeCard ->
+            ParameterCardContent(temporaryState.sliderPositions, card)
+        }
     }
 }
 
-private fun cardsToMap(uiState: AlarmConfigUiState.ConfigData): Map<String, MutableState<ClosedFloatingPointRange<Float>>> =
+fun cardsToMap(uiState: AlarmConfigUiState.ConfigData): Map<String, ClosedFloatingPointRange<Float>> =
     uiState.cards.associate { card ->
-        card.title to mutableStateOf(card.startValue.toFloat()..card.endValue.toFloat())
+        card.title to (card.startValue.toFloat()..card.endValue.toFloat())
     }
 
 @Composable
@@ -422,5 +386,6 @@ private fun Preview() {
             ),
         )
     )
-    AlarmConfigContent(uiState, {}, {_, _, _, _, _, _, _ ->})
+    val temporaryState = AlarmConfigEditState()
+    AlarmConfigContent(uiState, temporaryState, {})
 }

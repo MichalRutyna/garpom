@@ -11,8 +11,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -29,13 +33,17 @@ import mm.zamiec.garpom.ui.navigation.MeasurementScreen
 import mm.zamiec.garpom.ui.navigation.Station
 import mm.zamiec.garpom.ui.navigation.StationConfig
 import mm.zamiec.garpom.ui.screens.alarm_config.AlarmConfigScreen
+import mm.zamiec.garpom.ui.screens.alarm_config.alarmConfigScaffoldElements
 import mm.zamiec.garpom.ui.screens.alarms.AlarmsScreen
+import mm.zamiec.garpom.ui.screens.alarms.alarmsScreenScaffoldElements
 import mm.zamiec.garpom.ui.screens.configure.ConfigureScreen
 import mm.zamiec.garpom.ui.screens.auth.AuthRouteController
 import mm.zamiec.garpom.ui.screens.home.HomeScreen
 import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreen
+import mm.zamiec.garpom.ui.screens.measurement.measurementScreenScaffoldElements
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.screens.station.StationScreen
+import mm.zamiec.garpom.ui.screens.station.stationScaffoldElements
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @AndroidEntryPoint
@@ -52,15 +60,20 @@ class Nav3Activity : ComponentActivity() {
 
     }
 
-
     @Composable
     fun NavComponent() {
         val backStack = rememberNavBackStack(BottomNavDestination.Home)
+        val currentEntry = backStack.lastOrNull()
 
         // Needed for properly handling back gesture when in sub-navdisplays
         val isInSubNavigation = remember { mutableStateOf(false) }
 
+        // Used for hoisting scaffold elements from specific destinations
+        var scaffoldElements by remember { mutableStateOf(ScaffoldElements()) }
+
         Scaffold(
+            topBar = { scaffoldElements.topBar?.invoke() },
+            floatingActionButton = { scaffoldElements.fab?.invoke() },
             bottomBar = {
                 AppNavigationBar(
                     backStack.lastOrNull() as? BottomNavDestination,
@@ -70,7 +83,6 @@ class Nav3Activity : ComponentActivity() {
                     }
                 )
             }
-            // TODO TODODOTODOTODTODOTOTD
         ) { innerPadding ->
 //                Text(text = "backstack: " +backStack.toList())
                 NavDisplay(
@@ -84,6 +96,7 @@ class Nav3Activity : ComponentActivity() {
                     onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
                         entry<BottomNavDestination.Home> {
+                            scaffoldElements = ScaffoldElements()
                             HomeScreen(
                                 onStationSummaryClicked = { stationId ->
                                     backStack.add(Station(stationId))
@@ -94,6 +107,8 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<BottomNavDestination.Alarms> {
+                            scaffoldElements = alarmsScreenScaffoldElements(
+                                    onCreateAlarmClicked = { backStack.add(AlarmConfig("")) })
                             AlarmsScreen(
                                 onRecentAlarmOccurrenceClicked = { measurementId ->
                                     backStack.add(MeasurementScreen(measurementId))
@@ -101,23 +116,20 @@ class Nav3Activity : ComponentActivity() {
                                 onAlarmClicked = { alarmId ->
                                     backStack.add(AlarmConfig(alarmId))
                                 },
-                                onCreateAlarmClicked = {
-                                    backStack.add(AlarmConfig(""))
-                                },
+
                                 onStationClicked = { stationId ->
                                     backStack.add(Station(stationId))
                                 }
                             )
                         }
                         entry<AlarmConfig> { key ->
+                            scaffoldElements = alarmConfigScaffoldElements(key.id, onBack = { backStack.removeLastOrNull() })
                             AlarmConfigScreen(
-                                alarmId = key.id,
-                                onBack = {
-                                    backStack.removeLastOrNull()
-                                }
+                                alarmId = key.id
                             )
                         }
                         entry<BottomNavDestination.Configure> {
+                            scaffoldElements = ScaffoldElements()
                             ConfigureScreen(
                                 onUnableToConfigure = {
                                     backStack.clear()
@@ -129,11 +141,13 @@ class Nav3Activity : ComponentActivity() {
                             // TODO station config
                         }
                         entry<BottomNavDestination.Profile> {
+                            scaffoldElements = ScaffoldElements()
                             ProfileScreen(onNavigateToAuth = {
                                 backStack.add(Auth)
                             })
                         }
                         entry<Auth> {
+                            scaffoldElements = ScaffoldElements()
                             AuthRouteController(onAuthSuccess = {
                                 backStack.removeLastOrNull()
                                 Log.d("Main", "AUTH SUCCESS")
@@ -141,6 +155,7 @@ class Nav3Activity : ComponentActivity() {
                             isInSubNavigation = isInSubNavigation)
                         }
                         entry<Station> { key ->
+                            scaffoldElements = stationScaffoldElements(key.id, onBack = { backStack.removeLastOrNull() })
                             StationScreen(
                                 stationId = key.id,
                                 onMeasurementClicked = { measurementId ->
@@ -155,6 +170,7 @@ class Nav3Activity : ComponentActivity() {
                             )
                         }
                         entry<MeasurementScreen> { key ->
+                            scaffoldElements = measurementScreenScaffoldElements(key.id, onBack = { backStack.removeLastOrNull() })
                             MeasurementScreen(
                                 measurementId = key.id,
                                 onAlarmClick = {

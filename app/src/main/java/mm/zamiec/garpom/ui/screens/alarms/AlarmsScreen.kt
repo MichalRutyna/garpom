@@ -41,12 +41,11 @@ fun AlarmsScreen(
      alarmsScreenViewModel: AlarmsScreenViewModel = hiltViewModel(),
      onRecentAlarmOccurrenceClicked: (String) -> Unit,
      onAlarmClicked: (String) -> Unit,
-     onCreateAlarmClicked: () -> Unit,
      onStationClicked: (String) -> Unit,
 ) {
     val uiState: AlarmsUiState by alarmsScreenViewModel.uiState.collectAsState(AlarmsUiState())
 
-    AlarmsScreenContent(uiState, onRecentAlarmOccurrenceClicked, onAlarmClicked, onCreateAlarmClicked, onStationClicked)
+    AlarmsScreenContent(uiState, onRecentAlarmOccurrenceClicked, onAlarmClicked, onStationClicked)
 }
 
 @Composable
@@ -54,56 +53,43 @@ private fun AlarmsScreenContent(
     uiState: AlarmsUiState,
     onRecentAlarmOccurrenceClicked: (String) -> Unit,
     onAlarmClicked: (String) -> Unit,
-    onCreateAlarmClicked: () -> Unit,
     onStationClicked: (String) -> Unit,
 ) {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    Scaffold (
-        floatingActionButton = {
-            FloatingActionButton({
-                onCreateAlarmClicked()
-            }) {
-                Icon(Icons.Filled.Add, "Create an alarm.")
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        item {
+            AlarmTitle()
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        uiState.stationAlarmsList.forEach {
+            item {
+                StationItem(onStationClicked, it)
+                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+            }
+            items(it.alarmList) { alarm ->
+                AlarmItem(onAlarmClicked, alarm)
+                HorizontalDivider(Modifier.padding(horizontal = 20.dp))
             }
         }
-    ) { paddingValues ->
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-//            modifier = Modifier.padding(paddingValues)
-        ) {
-            item {
-                AlarmTitle()
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
-            uiState.stationAlarmsList.forEach {
-                item {
-                    StationItem(onStationClicked, it)
-                    HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-                }
-                items(it.alarmList) { alarm ->
-                    AlarmItem(onAlarmClicked, alarm)
-                    HorizontalDivider(Modifier.padding(horizontal = 20.dp))
-                }
-            }
-            item {
-                Spacer(Modifier.height(50.dp))
-                RecentOccurrencesTitle()
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
-            items(uiState.recentAlarmOccurrencesList) { alarmOccurrence ->
-                RecentOccurrenceItem(onRecentAlarmOccurrenceClicked, alarmOccurrence)
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
+        item {
+            Spacer(Modifier.height(50.dp))
+            RecentOccurrencesTitle()
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        items(uiState.recentAlarmOccurrencesList) { alarmOccurrence ->
+            RecentOccurrenceItem(onRecentAlarmOccurrenceClicked, alarmOccurrence)
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
 
-            item {
-                Spacer(Modifier.height(50.dp))
-                AllOccurrencesTitle()
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
-            items(uiState.allAlarmOccurrencesList) { alarmOccurrence ->
-                AlarmOccurrenceItem(onRecentAlarmOccurrenceClicked, alarmOccurrence)
-                HorizontalDivider(Modifier.padding(horizontal = 10.dp))
-            }
+        item {
+            Spacer(Modifier.height(50.dp))
+            AllOccurrencesTitle()
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
+        }
+        items(uiState.allAlarmOccurrencesList) { alarmOccurrence ->
+            AlarmOccurrenceItem(onRecentAlarmOccurrenceClicked, alarmOccurrence)
+            HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
     }
 }
@@ -306,6 +292,6 @@ fun Preview() {
         )
     )
     GarPomTheme {
-        AlarmsScreenContent(uiState, {}, {}, {},{})
+        AlarmsScreenContent(uiState, {}, {}, {})
     }
 }

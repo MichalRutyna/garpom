@@ -3,7 +3,6 @@ package mm.zamiec.garpom.ui.screens.alarm_config.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -19,10 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import mm.zamiec.garpom.ui.screens.alarm_config.AlarmConfigUiState
 
 @Composable
-fun TitleBar(
+fun AlarmConfigTitleBar(
     onBack: () -> Unit,
     name: String
 ) {
