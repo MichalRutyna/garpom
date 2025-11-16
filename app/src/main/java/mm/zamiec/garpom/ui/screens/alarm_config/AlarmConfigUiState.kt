@@ -14,7 +14,7 @@ import java.util.Calendar
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-open class AlarmConfigUiState {
+interface AlarmConfigUiState {
     class ConfigData(
         val alarmId: String = "",
         val createAlarm: Boolean = true,
@@ -34,11 +34,13 @@ open class AlarmConfigUiState {
                     values.second
                 )
             }
-    ) : AlarmConfigUiState()
+    ) : AlarmConfigUiState
 
-    data class Error(val message: String) : AlarmConfigUiState()
+    data class Error(val message: String) : AlarmConfigUiState
 
-    object Loading : AlarmConfigUiState()
+    object Loading : AlarmConfigUiState
+
+    object GoBack : AlarmConfigUiState
 }
 data class StationChoice (
     val stationId: String,

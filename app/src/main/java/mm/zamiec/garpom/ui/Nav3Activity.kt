@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -125,7 +126,8 @@ class Nav3Activity : ComponentActivity() {
                         entry<AlarmConfig> { key ->
                             scaffoldElements = alarmConfigScaffoldElements(key.id, onBack = { backStack.removeLastOrNull() })
                             AlarmConfigScreen(
-                                alarmId = key.id
+                                alarmId = key.id,
+                                onBack = { backStack.removeLastOrNull() }
                             )
                         }
                         entry<BottomNavDestination.Configure> {

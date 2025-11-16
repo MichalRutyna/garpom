@@ -30,6 +30,7 @@ fun MeasurementTopBar(
         modifier = Modifier.Companion
             .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(10.dp)
+            .padding(top = 20.dp)
             .fillMaxWidth()
     ) {
         Icon(
