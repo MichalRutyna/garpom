@@ -3,7 +3,11 @@ package mm.zamiec.garpom.ui.screens.configure
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
@@ -85,6 +89,69 @@ class BluetoothViewModel @Inject constructor (
 
     }
 
+    private val bluetoothGattCallback = object : BluetoothGattCallback() {
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.d(TAG, "Gatt connected, discovering")
+                gatt?.discoverServices()
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d(TAG, "Gatt disconnected")
+            }
+        }
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                val gattServices = gatt?.services
+                Log.d(TAG, "Gatt services discovered: "+gattServices)
+                if (gattServices == null) return
+
+                var uuid: String?
+                val gattServiceData: MutableList<HashMap<String, String>> = mutableListOf()
+                val gattCharacteristicData: MutableList<ArrayList<HashMap<String, String>>> =
+                    mutableListOf()
+
+                gattServices.forEach { gattService ->
+                    val currentServiceData = HashMap<String, String>()
+                    uuid = gattService.uuid.toString()
+                    currentServiceData["type"] = gattService.type.toString()
+                    currentServiceData["uuid"] = uuid
+                    gattServiceData += currentServiceData
+
+                    val gattCharacteristicGroupData: ArrayList<HashMap<String, String>> = arrayListOf()
+                    val gattCharacteristics = gattService.characteristics
+                    val charas: MutableList<BluetoothGattCharacteristic> = mutableListOf()
+
+                    // Loops through available Characteristics.
+                    gattCharacteristics.forEach { gattCharacteristic ->
+                        charas += gattCharacteristic
+                        val currentCharaData: HashMap<String, String> = hashMapOf()
+                        uuid = gattCharacteristic.uuid.toString()
+                        currentCharaData["name"] = gattCharacteristic.descriptors.toString()
+                        currentCharaData["uuid"] = uuid
+                        gattCharacteristicGroupData += currentCharaData
+                    }
+                    gattCharacteristicData += gattCharacteristicGroupData
+                }
+
+                Log.d(TAG, "Services: " + gattServiceData)
+                Log.d(TAG, "Characteristics: " + gattCharacteristicData)
+                _uiState.value = ConfigureScreenUiState.ServiceData(gattServiceData, gattCharacteristicData)
+            } else {
+                Log.w(TAG, "onServicesDiscovered received: $status")
+            }
+        }
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(TAG, "Characteristic read: " + gatt.readCharacteristic(characteristic))
+            }
+        }
+    }
+
     fun connectBluetooth(pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
         Log.d(TAG, "Connecting")
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
@@ -112,6 +179,11 @@ class BluetoothViewModel @Inject constructor (
                     var associationId: Int = associationInfo.id
                     var macAddress: MacAddress? = associationInfo.deviceMacAddress
                     Log.d(TAG, "Mac Address: $macAddress")
+
+                    Log.d(TAG, "Associated:" + associationInfo.associatedDevice)
+                    Log.d(TAG, "Ble device:" + associationInfo.associatedDevice?.bleDevice)
+                    Log.d(TAG, "Device:" + associationInfo.associatedDevice?.bleDevice?.device)
+                    associationInfo.associatedDevice?.bleDevice?.device?.connectGatt(context, false, bluetoothGattCallback)
 
                 }
                 override fun onFailure(errorMessage: CharSequence?) {

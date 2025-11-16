@@ -40,12 +40,12 @@ class AlarmConfigScreenViewModel @AssistedInject constructor(
     init {
         _uiState.value = AlarmConfigUiState.Loading
         viewModelScope.launch {
-            if (alarmId == "") {
-                _uiState.value = alarmConfigManager.getNewAlarmState()
+            val state = if (alarmId == "") {
+                alarmConfigManager.getNewAlarmState()
             } else {
-
-                _uiState.value = alarmConfigManager.alarmDetails(alarmId)
+                alarmConfigManager.alarmDetails(alarmId)
             }
+            _uiState.value = state
             resetFromUiState()
         }
     }
@@ -111,11 +111,19 @@ class AlarmConfigScreenViewModel @AssistedInject constructor(
         viewModelScope.launch {
             alarmConfigManager.saveUiState(uiState)
         }
+//            .invokeOnCompletion {
+//            _uiState.value = AlarmConfigUiState.GoBack
+//        }
     }
 
     fun resetSliders() {
         editState.value.sliderPositions.clear()
         editState.value.sliderPositions.putAll(cardsToMap(uiState.value as AlarmConfigUiState.ConfigData))
+    }
+
+    fun backed() {
+        _uiState.value = AlarmConfigUiState.Loading
+        Log.d("configViewModel", "backed")
     }
 
     @AssistedFactory

@@ -7,4 +7,9 @@ open class ConfigureScreenUiState(
     object PermissionDialog: ConfigureScreenUiState()
     object BluetoothRejected: ConfigureScreenUiState()
     object DeviceIncompatible: ConfigureScreenUiState()
+
+    class ServiceData (
+        val serviceData: MutableList<HashMap<String, String>>,
+        val characteristicsData: MutableList<ArrayList<HashMap<String, String>>>
+    ): ConfigureScreenUiState()
 }

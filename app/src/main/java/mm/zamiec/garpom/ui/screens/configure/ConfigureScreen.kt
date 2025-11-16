@@ -15,9 +15,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -96,53 +105,58 @@ fun ConfigureScreen(
         onPauseOrDispose {  }
     }
 
-    if (configureState.value == ConfigureScreenUiState.PermissionDialog) {
-        BluetoothExplanationDialog(
-            onDismiss = {
-                bluetoothViewModel.alertPermissionRejected()
-            },
-            onConfirm = {
-                btPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
+    when (configureState.value) {
+        is ConfigureScreenUiState.PermissionDialog -> {
+            BluetoothExplanationDialog(
+                onDismiss = {
+                    bluetoothViewModel.alertPermissionRejected()
+                },
+                onConfirm = {
+                    btPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
+                })
+        }
+        is ConfigureScreenUiState.BluetoothRejected -> {
+            BluetoothRejectedDialog(onConfirmed = {
+                onUnableToConfigure()
+                bluetoothViewModel.clearDialog()
             })
-    }
-
-    if (configureState.value == ConfigureScreenUiState.BluetoothRejected) {
-        BluetoothRejectedDialog(onConfirmed = {
-            onUnableToConfigure()
-            bluetoothViewModel.clearDialog()
-        })
-    }
-
-    if (configureState.value == ConfigureScreenUiState.DeviceIncompatible) {
-        DeviceIncompatibleDialog(onConfirmed = {
-            onUnableToConfigure()
-            bluetoothViewModel.clearDialog()
-        })
-    }
-
-    if (configureState.value == ConfigureScreenUiState.PermissionConfirmed) {
-        bluetoothViewModel.connectBluetooth(pairingLauncher)
-        bluetoothViewModel.alertPairingLaunched()
-    }
-
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text("Configure")
-        Button(onClick = {
-            bluetoothViewModel.pair(
-                activity!!,
-                btPermissionLauncher,
-                btEnableLauncher,
-                pairingLauncher
-            )
-        }) {
-            Text("Pair")
+        }
+        is ConfigureScreenUiState.DeviceIncompatible -> {
+            DeviceIncompatibleDialog(onConfirmed = {
+                onUnableToConfigure()
+                bluetoothViewModel.clearDialog()
+            })
+        }
+        is ConfigureScreenUiState.PermissionConfirmed -> {
+            bluetoothViewModel.connectBluetooth(pairingLauncher)
+            bluetoothViewModel.alertPairingLaunched()
         }
     }
 
+    when (configureState.value) {
+        is ConfigureScreenUiState.ServiceData -> {
+            ServiceDataScreen(configureState.value as ConfigureScreenUiState.ServiceData)
+        }
+        else -> {
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text("Configure")
+                Button(onClick = {
+                    bluetoothViewModel.pair(
+                        activity!!,
+                        btPermissionLauncher,
+                        btEnableLauncher,
+                        pairingLauncher
+                    )
+                }) {
+                    Text("Pair")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -215,4 +229,82 @@ private fun DeviceIncompatibleDialog(
         title = {Text("Device incompatible")},
         text = {Text("We weren't able to launch pairing from this device. It might mean it's incompatible. We apologize for the inconvenience.")},
     )
+}
+
+@Composable
+private fun ServiceDataScreen(
+    data: ConfigureScreenUiState.ServiceData
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+// Sekcja Services
+        item {
+            Text(
+                "Services",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
+
+
+        itemsIndexed(data.serviceData) { index, service ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        "Service ${index + 1}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                    service.forEach { (key, value) ->
+                        Text("$key: $value", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+
+
+// Sekcja Characteristics
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                "Characteristics",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
+
+
+        itemsIndexed(data.characteristicsData) { index, characteristicsList ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        "Characteristics for Service ${index + 1}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                    characteristicsList.forEach { map ->
+                        map.forEach { (ckey, cvalue) ->
+                            Text("$ckey: $cvalue", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                }
+            }
+        }
+    }
 }

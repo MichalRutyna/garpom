@@ -46,6 +46,3 @@ fun alarmConfigScaffoldElements(
     return scaffoldElements
 
 }
-
-//onSave: (Boolean, String, String, TimePickerState, TimePickerState, SnapshotStateList<StationChoice>,
-//Map<String, MutableState<ClosedFloatingPointRange<Float>>>) -> Unit,

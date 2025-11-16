@@ -1,5 +1,6 @@
 package mm.zamiec.garpom.ui.screens.alarm_config
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,12 +54,16 @@ fun AlarmConfigScreen(
         creationCallback = { factory: AlarmConfigScreenViewModel.Factory ->
             factory.create(alarmId)
         }
-    )
+    ),
+    onBack: () -> Unit,
 ) {
     val uiState: AlarmConfigUiState by alarmConfigViewModel.uiState.collectAsState()
     val temporaryState by alarmConfigViewModel.editState.collectAsState()
 
+
     when (uiState) {
+        is AlarmConfigUiState.GoBack ->
+            { alarmConfigViewModel.backed(); onBack() }
         is AlarmConfigUiState.Loading ->
             { AlarmConfigLoadingScreen() }
         is AlarmConfigUiState.ConfigData -> {
