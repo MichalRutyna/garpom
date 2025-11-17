@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
@@ -16,6 +18,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.net.MacAddress
+import android.os.Handler
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -40,6 +43,7 @@ class BluetoothViewModel @Inject constructor (
     val uiState: StateFlow<ConfigureScreenUiState> = _uiState.asStateFlow()
 
     private val _bluetoothPermissionGranted = MutableStateFlow(false)
+    private val _bluetoothScanPermissionGranted = MutableStateFlow(false)
 
     val TAG = "Bluetooth"
     val executor: Executor = Executor { it.run() }
@@ -53,6 +57,14 @@ class BluetoothViewModel @Inject constructor (
 
     fun updatePermissionStatus(granted: Boolean) {
         _bluetoothPermissionGranted.value = granted
+        if (granted and (_uiState.value == ConfigureScreenUiState.BluetoothRejected)) {
+            alertPermissionConfirmed()
+
+        }
+    }
+
+    fun updateScanPermissionStatus(granted: Boolean) {
+        _bluetoothScanPermissionGranted.value = granted
         if (granted and (_uiState.value == ConfigureScreenUiState.BluetoothRejected)) {
             alertPermissionConfirmed()
 
@@ -77,6 +89,13 @@ class BluetoothViewModel @Inject constructor (
             return
         }
 
+        if (!_bluetoothScanPermissionGranted.value) {
+            btPermissionLauncher.launch(
+                Manifest.permission.BLUETOOTH_SCAN)
+            return
+        }
+
+
         if (bluetoothAdapter.isEnabled) {
             Log.d(TAG, "Adapter enabled, connecting")
             connectBluetooth(pairingLauncher)
@@ -90,7 +109,6 @@ class BluetoothViewModel @Inject constructor (
     }
 
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
-        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.d(TAG, "Gatt connected, discovering")
@@ -101,6 +119,9 @@ class BluetoothViewModel @Inject constructor (
         }
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                gatt?.services.find { service ->
+                    service.uuid.
+                }
                 val gattServices = gatt?.services
                 Log.d(TAG, "Gatt services discovered: "+gattServices)
                 if (gattServices == null) return
@@ -152,6 +173,17 @@ class BluetoothViewModel @Inject constructor (
         }
     }
 
+
+
+    val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+    private val bluetoothLeScanner = bluetoothManager.adapter.bluetoothLeScanner
+    private var scanning = false
+    private val handler = Handler()
+
+    // Stops scanning after 10 seconds.
+    private val SCAN_PERIOD: Long = 10000
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectBluetooth(pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
         Log.d(TAG, "Connecting")
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
@@ -163,34 +195,53 @@ class BluetoothViewModel @Inject constructor (
             .setSingleDevice(false)
             .build()
 
-        deviceManager.associate(
-            pairingRequest,
-            executor,
-            object : CompanionDeviceManager.Callback() {
-                // Called when a device is found.
-                override fun onAssociationPending(intentSender: IntentSender) {
-                    pairingLauncher.launch(
-                        IntentSenderRequest.Builder(intentSender)
-                            .build()
-                    )
-                }
-                @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-                override fun onAssociationCreated(associationInfo: AssociationInfo) {
-                    var associationId: Int = associationInfo.id
-                    var macAddress: MacAddress? = associationInfo.deviceMacAddress
-                    Log.d(TAG, "Mac Address: $macAddress")
-
-                    Log.d(TAG, "Associated:" + associationInfo.associatedDevice)
-                    Log.d(TAG, "Ble device:" + associationInfo.associatedDevice?.bleDevice)
-                    Log.d(TAG, "Device:" + associationInfo.associatedDevice?.bleDevice?.device)
-                    associationInfo.associatedDevice?.bleDevice?.device?.connectGatt(context, false, bluetoothGattCallback)
-
-                }
-                override fun onFailure(errorMessage: CharSequence?) {
-                    Log.e(TAG, "Pairing error")
+        val leScanCallback: ScanCallback = object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult) {
+                super.onScanResult(callbackType, result)
+                Log.d(TAG, "Scan result: "+ result.device.address)
+                if(result.device.address.startsWith("DC:1E")) {
+                    result.device.connectGatt(context, false, bluetoothGattCallback)
                 }
             }
-        )
+        }
+
+        if (!scanning) { // Stops scanning after a pre-defined scan period.
+            handler.postDelayed({
+                scanning = false
+                bluetoothLeScanner.stopScan(leScanCallback)
+            }, SCAN_PERIOD)
+            scanning = true
+            bluetoothLeScanner.startScan(leScanCallback)
+        } else {
+            scanning = false
+            bluetoothLeScanner.stopScan(leScanCallback)
+        }
+
+//        deviceManager.associate(
+//            pairingRequest,
+//            executor,
+//            object : CompanionDeviceManager.Callback() {
+//                // Called when a device is found.
+//                override fun onAssociationPending(intentSender: IntentSender) {
+//                    pairingLauncher.launch(
+//                        IntentSenderRequest.Builder(intentSender)
+//                            .build()
+//                    )
+//                }
+//                @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+//                override fun onAssociationCreated(associationInfo: AssociationInfo) {
+//                    val mac = associationInfo.deviceMacAddress?.toString()
+//                    val device = bluetoothManager?.adapter?.getRemoteDevice(mac)
+//
+//                    Log.d(TAG, "Reconstructed BluetoothDevice: $device")
+//
+//                    device?.connectGatt(context, false, bluetoothGattCallback)
+//                }
+//                override fun onFailure(errorMessage: CharSequence?) {
+//                    Log.e(TAG, "Pairing error")
+//                }
+//            }
+//        )
     }
 
     fun alertPermissionConfirmed() {

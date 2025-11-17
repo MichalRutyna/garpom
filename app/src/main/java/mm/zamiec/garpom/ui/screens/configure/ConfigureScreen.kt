@@ -65,6 +65,8 @@ fun ConfigureScreen(
                 val associationInfo : AssociationInfo? = result.data?.extras?.getParcelable(CompanionDeviceManager.EXTRA_ASSOCIATION,
                     AssociationInfo::class.java)
                 Log.d(TAG, "Pairing successful ${associationInfo!!.displayName}")
+                Log.d(TAG, "Device ${associationInfo.associatedDevice?.bleDevice}")
+                Log.d(TAG, "dsc ${associationInfo.associatedDevice?.describeContents()}")
             }
         }
     }
@@ -97,11 +99,17 @@ fun ConfigureScreen(
 
     LifecycleResumeEffect(Unit) {
         Log.d(TAG, "RESUMED")
-        val hasPermission = ContextCompat.checkSelfPermission(
+        var hasPermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
         bluetoothViewModel.updatePermissionStatus(hasPermission)
+
+        hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
+        bluetoothViewModel.updateScanPermissionStatus(hasPermission)
         onPauseOrDispose {  }
     }
 
@@ -128,7 +136,12 @@ fun ConfigureScreen(
             })
         }
         is ConfigureScreenUiState.PermissionConfirmed -> {
-            bluetoothViewModel.connectBluetooth(pairingLauncher)
+            bluetoothViewModel.pair(
+                activity!!,
+                btPermissionLauncher,
+                btEnableLauncher,
+                pairingLauncher
+            )
             bluetoothViewModel.alertPairingLaunched()
         }
     }
