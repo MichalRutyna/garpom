@@ -1,6 +1,7 @@
 package mm.zamiec.garpom.ui.screens.configure
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
@@ -8,107 +9,168 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
-import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanResult
-import android.companion.AssociationInfo
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.content.Intent
-import android.content.IntentSender
-import android.net.MacAddress
-import android.os.Handler
+import android.content.pm.PackageManager
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.RequiresPermission
+import androidx.compose.runtime.mutableStateListOf
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import mm.zamiec.garpom.ui.screens.configure.ConfigureScreenUiState
-import java.util.concurrent.Executor
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import mm.zamiec.garpom.data.bluetooth.scanAsFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class BluetoothViewModel @Inject constructor (
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow<ConfigureScreenUiState>(ConfigureScreenUiState.Idle)
-    val uiState: StateFlow<ConfigureScreenUiState> = _uiState.asStateFlow()
-
-    private val _bluetoothPermissionGranted = MutableStateFlow(false)
-    private val _bluetoothScanPermissionGranted = MutableStateFlow(false)
-
     val TAG = "Bluetooth"
-    val executor: Executor = Executor { it.run() }
 
-    val deviceManager: CompanionDeviceManager by lazy {
-        ContextCompat.getSystemService(
-            context,
-            CompanionDeviceManager::class.java
-        ) as CompanionDeviceManager
+    private val _uiState = MutableStateFlow(ConfigureUiState())
+    val uiState: StateFlow<ConfigureUiState> = _uiState.asStateFlow()
+
+    fun hasBtPermissions(): Boolean {
+        val scan = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val connect = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.BLUETOOTH_CONNECT
+        ) == PackageManager.PERMISSION_GRANTED
+
+        return scan && connect
     }
 
-    fun updatePermissionStatus(granted: Boolean) {
-        _bluetoothPermissionGranted.value = granted
-        if (granted and (_uiState.value == ConfigureScreenUiState.BluetoothRejected)) {
-            alertPermissionConfirmed()
+    private val bluetoothManager: BluetoothManager? = context.getSystemService(BluetoothManager::class.java)
+    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
 
-        }
-    }
+    private val SCAN_TIMEOUT = 10_000L
+    private var scanJob: Job? = null
+    private var _scanResultsDevices = mutableListOf<ScanResult>()
+    var scanResults = mutableStateListOf<StationScanResult>()
+        private set
 
-    fun updateScanPermissionStatus(granted: Boolean) {
-        _bluetoothScanPermissionGranted.value = granted
-        if (granted and (_uiState.value == ConfigureScreenUiState.BluetoothRejected)) {
-            alertPermissionConfirmed()
 
-        }
-    }
-
-    fun pair(activity: Activity, btPermissionLauncher: ActivityResultLauncher<String>, btEnableLauncher: ActivityResultLauncher<Intent>, pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
-
-        val bluetoothManager: BluetoothManager? =
-            ContextCompat.getSystemService(context, BluetoothManager::class.java)
-        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager?.adapter
+    @SuppressLint("MissingPermission") // permission check in this function
+    fun initialConfiguration(activity: Activity) {
         if (bluetoothAdapter == null) {
-            Log.w(TAG,"Bluetooth is not supported on this device")
-            _uiState.value = ConfigureScreenUiState.DeviceIncompatible
+            _uiState.value = _uiState.value.copy(dialog = DialogState.DeviceIncompatible)
             return
         }
 
-        if (!_bluetoothPermissionGranted.value) {
-            btPermissionLauncher.launch(
-                Manifest.permission.BLUETOOTH_CONNECT)
-            // connectBluetooth() from callback
+        if (!hasBtPermissions()) {
+            val shouldShowRationaleScan = ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, Manifest.permission.BLUETOOTH_SCAN
+            )
+            val shouldShowRationaleConnect = ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, Manifest.permission.BLUETOOTH_CONNECT
+            )
+
+            if (shouldShowRationaleScan || shouldShowRationaleConnect) {
+                _uiState.value = _uiState.value.copy(dialog = DialogState.PermissionExplanationNeeded)
+            } else {
+                // first-time request
+                _uiState.value = _uiState.value.copy(dialog = null)
+                _requestPermissionsCallback?.invoke()
+            }
             return
         }
 
-        if (!_bluetoothScanPermissionGranted.value) {
-            btPermissionLauncher.launch(
-                Manifest.permission.BLUETOOTH_SCAN)
+        initiatePairing()
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun initiatePairing() {
+        if (bluetoothAdapter == null) {
+            _uiState.value = _uiState.value.copy(dialog = DialogState.DeviceIncompatible)
             return
         }
 
-
-        if (bluetoothAdapter.isEnabled) {
-            Log.d(TAG, "Adapter enabled, connecting")
-            connectBluetooth(pairingLauncher)
-        } else {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            btEnableLauncher.launch(enableBtIntent)
-            // connectBluetooth() from callback
+        if (!bluetoothAdapter.isEnabled) {
+            Log.d(TAG, "Requesting bluetooth enable")
+            _bluetoothEnableCallback?.invoke()
+            return
         }
+        scanBluetooth()
+    }
 
+
+    fun scanBluetooth() {
+        Log.d(TAG, "Connecting")
+        _uiState.value = _uiState.value.copy(screenState = ScreenState.Scanning)
+        bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
+
+        if (scanJob != null) return
+
+        scanResults.clear()
+        seenAddresses.clear()
+
+        scanJob = viewModelScope.launch {
+            withTimeoutOrNull(SCAN_TIMEOUT) {
+                bluetoothLeScanner?.scanAsFlow()?.collect { result ->
+                    showScanResult(result)
+                }
+            }
+            stopScan()
+        }
+    }
+
+    fun stopScan() {
+        scanJob?.cancel()
+        scanJob = null
+        if (_uiState.value.screenState != ScreenState.ScanResults)
+            _uiState.value = _uiState.value.copy(screenState = ScreenState.ScanResults)
 
     }
 
+    override fun onCleared() {
+        stopScan()
+        super.onCleared()
+    }
+
+    val seenAddresses = mutableSetOf<String>()
+
+    @SuppressLint("MissingPermission")
+    fun showScanResult(result: ScanResult) {
+        val address = result.device.address
+        if (seenAddresses.add(address)) {
+            _scanResultsDevices.add(result)
+            scanResults.add(
+                StationScanResult(
+                    result.device.address,
+                    result.device.name
+                )
+            )
+        }
+        if(scanResults.isNotEmpty()) {
+            _uiState.value = _uiState.value.copy(screenState = ScreenState.ScanResults)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun connectToResultByAddress(address: String) {
+        val result = _scanResultsDevices.find { it.device.address == choice.address }
+
+        if (result == null) {
+            _uiState.value = _uiState.value.copy(screenState = ScreenState.PairingError("Invalid address selected"))
+            return
+        }
+        result.device!!.connectGatt(context, false, bluetoothGattCallback)
+    }
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.d(TAG, "Gatt connected, discovering")
@@ -119,9 +181,9 @@ class BluetoothViewModel @Inject constructor (
         }
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                gatt?.services.find { service ->
-                    service.uuid.
-                }
+//                gatt?.services?.find { service ->
+////                    service.uuid.
+//                }
                 val gattServices = gatt?.services
                 Log.d(TAG, "Gatt services discovered: "+gattServices)
                 if (gattServices == null) return
@@ -156,7 +218,6 @@ class BluetoothViewModel @Inject constructor (
 
                 Log.d(TAG, "Services: " + gattServiceData)
                 Log.d(TAG, "Characteristics: " + gattCharacteristicData)
-                _uiState.value = ConfigureScreenUiState.ServiceData(gattServiceData, gattCharacteristicData)
             } else {
                 Log.w(TAG, "onServicesDiscovered received: $status")
             }
@@ -173,91 +234,33 @@ class BluetoothViewModel @Inject constructor (
         }
     }
 
+    // callback set by the Composable to trigger permission launcher
+    private var _requestPermissionsCallback: (() -> Unit)? = null
+    fun setRequestPermissionsCallback(callback: () -> Unit) {
+        _requestPermissionsCallback = callback
+    }
 
-
-    val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
-    private val bluetoothLeScanner = bluetoothManager.adapter.bluetoothLeScanner
-    private var scanning = false
-    private val handler = Handler()
-
-    // Stops scanning after 10 seconds.
-    private val SCAN_PERIOD: Long = 10000
-
+    private var _bluetoothEnableCallback: (() -> Unit)? = null
+    fun setBluetoothEnableCallback(callback: () -> Unit) {
+        _bluetoothEnableCallback = callback
+    }
+    fun onExplanationAccepted() {
+        _uiState.value = _uiState.value.copy(dialog = null)
+        _requestPermissionsCallback?.invoke()
+    }
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    fun connectBluetooth(pairingLauncher: ActivityResultLauncher<IntentSenderRequest>) {
-        Log.d(TAG, "Connecting")
-        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-//            .setNamePattern(Pattern.compile("My device"))
-//            .addServiceUuid(ParcelUuid(UUID(0x123abcL, -1L)), null)
-            .build()
-        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
-            .addDeviceFilter(deviceFilter)
-            .setSingleDevice(false)
-            .build()
-
-        val leScanCallback: ScanCallback = object : ScanCallback() {
-            override fun onScanResult(callbackType: Int, result: ScanResult) {
-                super.onScanResult(callbackType, result)
-                Log.d(TAG, "Scan result: "+ result.device.address)
-                if(result.device.address.startsWith("DC:1E")) {
-                    result.device.connectGatt(context, false, bluetoothGattCallback)
-                }
-            }
-        }
-
-        if (!scanning) { // Stops scanning after a pre-defined scan period.
-            handler.postDelayed({
-                scanning = false
-                bluetoothLeScanner.stopScan(leScanCallback)
-            }, SCAN_PERIOD)
-            scanning = true
-            bluetoothLeScanner.startScan(leScanCallback)
-        } else {
-            scanning = false
-            bluetoothLeScanner.stopScan(leScanCallback)
-        }
-
-//        deviceManager.associate(
-//            pairingRequest,
-//            executor,
-//            object : CompanionDeviceManager.Callback() {
-//                // Called when a device is found.
-//                override fun onAssociationPending(intentSender: IntentSender) {
-//                    pairingLauncher.launch(
-//                        IntentSenderRequest.Builder(intentSender)
-//                            .build()
-//                    )
-//                }
-//                @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-//                override fun onAssociationCreated(associationInfo: AssociationInfo) {
-//                    val mac = associationInfo.deviceMacAddress?.toString()
-//                    val device = bluetoothManager?.adapter?.getRemoteDevice(mac)
-//
-//                    Log.d(TAG, "Reconstructed BluetoothDevice: $device")
-//
-//                    device?.connectGatt(context, false, bluetoothGattCallback)
-//                }
-//                override fun onFailure(errorMessage: CharSequence?) {
-//                    Log.e(TAG, "Pairing error")
-//                }
-//            }
-//        )
+    fun onPermissionsGranted() {
+        _uiState.value = _uiState.value.copy(dialog = null)
+        initiatePairing()
     }
-
-    fun alertPermissionConfirmed() {
-        _uiState.value = ConfigureScreenUiState.PermissionConfirmed
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun onBluetoothEnabled() {
+        initiatePairing()
     }
-
-    fun alertPairingLaunched() {
-        _uiState.value = ConfigureScreenUiState.Idle
-        // TODO special state
+    fun onPermissionsDenied() {
+        _uiState.value = _uiState.value.copy(dialog = DialogState.PermissionsDenied)
     }
-
-    fun alertPermissionRejected() {
-        _uiState.value = ConfigureScreenUiState.BluetoothRejected
-    }
-
     fun clearDialog() {
-        _uiState.value = ConfigureScreenUiState.Idle
+        _uiState.value = _uiState.value.copy(dialog = null)
     }
 }

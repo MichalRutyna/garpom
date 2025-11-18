@@ -132,12 +132,7 @@ class Nav3Activity : ComponentActivity() {
                         }
                         entry<BottomNavDestination.Configure> {
                             scaffoldElements = ScaffoldElements()
-                            ConfigureScreen(
-                                onUnableToConfigure = {
-                                    backStack.clear()
-                                    backStack.add(BottomNavDestination.Home)
-                                }
-                            )
+                            ConfigureScreen()
                         }
                         entry<StationConfig> { key ->
                             // TODO station config

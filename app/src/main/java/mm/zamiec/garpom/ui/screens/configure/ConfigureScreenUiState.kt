@@ -1,15 +1,24 @@
 package mm.zamiec.garpom.ui.screens.configure
 
-open class ConfigureScreenUiState(
-) {
-    object Idle: ConfigureScreenUiState()
-    object PermissionConfirmed: ConfigureScreenUiState()
-    object PermissionDialog: ConfigureScreenUiState()
-    object BluetoothRejected: ConfigureScreenUiState()
-    object DeviceIncompatible: ConfigureScreenUiState()
-
-    class ServiceData (
-        val serviceData: MutableList<HashMap<String, String>>,
-        val characteristicsData: MutableList<ArrayList<HashMap<String, String>>>
-    ): ConfigureScreenUiState()
+sealed class ScreenState {
+    object Initial : ScreenState()
+    object Scanning : ScreenState()
+    object ScanResults : ScreenState()
+    class PairingError(val message: String) : ScreenState()
 }
+
+sealed class DialogState {
+    object PermissionExplanationNeeded : DialogState()
+    object PermissionsDenied : DialogState()
+    object DeviceIncompatible : DialogState()
+}
+
+data class ConfigureUiState(
+    val screenState: ScreenState = ScreenState.Initial,
+    val dialog: DialogState? = null
+)
+
+class StationScanResult(
+    val address: String,
+    val name: String
+)
