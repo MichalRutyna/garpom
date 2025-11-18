@@ -10,9 +10,11 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.mutableStateListOf
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import mm.zamiec.garpom.data.bluetooth.scanAsFlow
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -106,7 +109,9 @@ class BluetoothViewModel @Inject constructor (
         scanBluetooth()
     }
 
-
+    private var scanning = false
+    private val handler = Handler()
+    @SuppressLint("MissingPermission")
     fun scanBluetooth() {
         Log.d(TAG, "Connecting")
         _uiState.value = _uiState.value.copy(screenState = ScreenState.Scanning)
@@ -144,6 +149,7 @@ class BluetoothViewModel @Inject constructor (
 
     @SuppressLint("MissingPermission")
     fun showScanResult(result: ScanResult) {
+        Log.d(TAG, "Found result")
         val address = result.device.address
         if (seenAddresses.add(address)) {
             _scanResultsDevices.add(result)
@@ -161,7 +167,7 @@ class BluetoothViewModel @Inject constructor (
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectToResultByAddress(address: String) {
-        val result = _scanResultsDevices.find { it.device.address == choice.address }
+        val result = _scanResultsDevices.find { it.device.address == address }
 
         if (result == null) {
             _uiState.value = _uiState.value.copy(screenState = ScreenState.PairingError("Invalid address selected"))
@@ -173,8 +179,13 @@ class BluetoothViewModel @Inject constructor (
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d(TAG, "Gatt connected, discovering")
-                gatt?.discoverServices()
+                if (gatt == null)
+                    return
+                Log.d(TAG, "Connected to Gatt server")
+                _uiState.value =
+                    _uiState.value.copy(screenState = ScreenState.TempStationScreen(gatt))
+//                gatt?.discoverServices()
+//                gatt?.writeCharacteristic()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "Gatt disconnected")
             }
@@ -234,6 +245,26 @@ class BluetoothViewModel @Inject constructor (
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun discoverServices(gatt: BluetoothGatt) {
+        gatt.discoverServices()
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun testLight(gatt: BluetoothGatt, red: Int, green: Int, blue: Int) {
+        val value = "#%02x%02x%02x".format(red, green, blue)
+        Log.d(TAG, "Sending '${value}'")
+        gatt.writeCharacteristic(
+            gatt.services.firstNotNullOf { service ->
+                service.characteristics.find { characteristic ->
+                    characteristic.uuid.equals(UUID.fromString("87654321-4321-4321-4321-ba0987654321"))
+                }
+            },
+            value.toByteArray(),
+            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+        )
+    }
+
     // callback set by the Composable to trigger permission launcher
     private var _requestPermissionsCallback: (() -> Unit)? = null
     fun setRequestPermissionsCallback(callback: () -> Unit) {
@@ -263,4 +294,5 @@ class BluetoothViewModel @Inject constructor (
     fun clearDialog() {
         _uiState.value = _uiState.value.copy(dialog = null)
     }
+
 }

@@ -20,24 +20,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
+import mm.zamiec.garpom.ui.screens.configure.components.ServiceDiscoveryDataScreen
 
 val TAG = "ConfigureScreen"
 
@@ -88,7 +94,7 @@ fun ConfigureScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Text("Scanning")
+                Text("Scanning...")
                 LoadingIndicator()
 
             }
@@ -107,6 +113,37 @@ fun ConfigureScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text("Pairing error: " + s.message)
+            }
+        }
+        is ScreenState.ServiceDiscoveryData -> {
+            ServiceDiscoveryDataScreen(s)
+        }
+
+        is ScreenState.TempStationScreen -> {
+            val red = remember { TextFieldState() }
+            val green = remember { TextFieldState() }
+            val blue = remember { TextFieldState() }
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Button(onClick = { bluetoothViewModel.discoverServices(s.station) }) {
+                    Text("Discover services")
+                }
+                Row {
+                    TextField(red)
+                    TextField(green)
+                    TextField(blue)
+                }
+                Button(onClick = { bluetoothViewModel.testLight(
+                    s.station,
+                    red.text.toString().toInt(),
+                    green.text.toString().toInt(),
+                    blue.text.toString().toInt(),
+                ) }) {
+                    Text("Test light")
+                }
             }
         }
     }
@@ -182,14 +219,20 @@ private fun ScanResults(
             }
         }
     }
-    LazyColumn {
-        item {
-            Text("Results:", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
-        }
-        items(scanResultsUiState) { item ->
-            Row {
-                Button(onClick = {}) {
-                    Text(item.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+    else {
+        LazyColumn {
+            item {
+                Text("Results:", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+            }
+            items(scanResultsUiState) { item ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    Button(onClick = {}) {
+                        Text(item.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+                    }
                 }
             }
         }
@@ -266,4 +309,29 @@ private fun DeviceIncompatibleDialog(
         title = {Text("Device incompatible")},
         text = {Text("We weren't able to launch pairing from this device. It might mean it's incompatible. We apologize for the inconvenience.")},
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview() {
+    val red = remember { TextFieldState() }
+    val green = remember { TextFieldState() }
+    val blue = remember { TextFieldState() }
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Button(onClick = {}) {
+            Text("Discover services")
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            TextField(red, modifier = Modifier.weight(0.3f).padding(5.dp))
+            TextField(green, modifier = Modifier.weight(0.3f).padding(5.dp))
+            TextField(blue, modifier = Modifier.weight(0.3f).padding(5.dp))
+        }
+        Button(onClick = {}) {
+            Text("Test light")
+        }
+    }
 }
