@@ -131,10 +131,10 @@ fun ConfigureScreen(
                 Button(onClick = { bluetoothViewModel.discoverServices(s.station) }) {
                     Text("Discover services")
                 }
-                Row {
-                    TextField(red)
-                    TextField(green)
-                    TextField(blue)
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    TextField(red, modifier = Modifier.weight(0.3f).padding(5.dp))
+                    TextField(green, modifier = Modifier.weight(0.3f).padding(5.dp))
+                    TextField(blue, modifier = Modifier.weight(0.3f).padding(5.dp))
                 }
                 Button(onClick = { bluetoothViewModel.testLight(
                     s.station,
@@ -169,7 +169,8 @@ fun ConfigureScreen(
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.ACCESS_FINE_LOCATION
                 )
             )
         }
@@ -230,8 +231,8 @@ private fun ScanResults(
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                 ) {
-                    Button(onClick = {}) {
-                        Text(item.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+                    Button(onClick = { onResultClicked(item.address) }) {
+                        Text(item.address, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
                     }
                 }
             }

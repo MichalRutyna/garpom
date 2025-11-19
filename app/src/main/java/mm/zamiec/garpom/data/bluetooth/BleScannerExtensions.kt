@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ fun BluetoothLeScanner.scanAsFlow(): Flow<ScanResult> = callbackFlow {
         }
     }
 
-    startScan(callback)
+    startScan(null, ScanSettings.Builder().build(), callback)
     Log.d("btScanner", "Started scan")
 
     awaitClose {

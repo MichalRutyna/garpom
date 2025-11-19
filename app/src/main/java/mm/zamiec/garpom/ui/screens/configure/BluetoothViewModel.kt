@@ -51,8 +51,12 @@ class BluetoothViewModel @Inject constructor (
         val connect = ContextCompat.checkSelfPermission(
             context, Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
+        val location = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
-        return scan && connect
+
+        return scan && connect && location
     }
 
     private val bluetoothManager: BluetoothManager? = context.getSystemService(BluetoothManager::class.java)
@@ -109,9 +113,6 @@ class BluetoothViewModel @Inject constructor (
         scanBluetooth()
     }
 
-    private var scanning = false
-    private val handler = Handler()
-    @SuppressLint("MissingPermission")
     fun scanBluetooth() {
         Log.d(TAG, "Connecting")
         _uiState.value = _uiState.value.copy(screenState = ScreenState.Scanning)
@@ -149,14 +150,14 @@ class BluetoothViewModel @Inject constructor (
 
     @SuppressLint("MissingPermission")
     fun showScanResult(result: ScanResult) {
-        Log.d(TAG, "Found result")
         val address = result.device.address
+        Log.d(TAG, "Found result: "+address)
         if (seenAddresses.add(address)) {
             _scanResultsDevices.add(result)
             scanResults.add(
                 StationScanResult(
                     result.device.address,
-                    result.device.name
+                    result.device.name ?: ""
                 )
             )
         }
@@ -167,6 +168,7 @@ class BluetoothViewModel @Inject constructor (
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connectToResultByAddress(address: String) {
+        stopScan()
         val result = _scanResultsDevices.find { it.device.address == address }
 
         if (result == null) {
@@ -255,11 +257,11 @@ class BluetoothViewModel @Inject constructor (
         val value = "#%02x%02x%02x".format(red, green, blue)
         Log.d(TAG, "Sending '${value}'")
         gatt.writeCharacteristic(
-            gatt.services.firstNotNullOf { service ->
-                service.characteristics.find { characteristic ->
-                    characteristic.uuid.equals(UUID.fromString("87654321-4321-4321-4321-ba0987654321"))
-                }
-            },
+            gatt.services.find { service ->
+                service.uuid.equals(UUID.fromString("12345678-1234-1234-1234-1234567890ab"))
+            }?.characteristics?.find { characteristic ->
+                characteristic.uuid.equals(UUID.fromString("87654321-4321-4321-4321-ba0987654321"))
+            } ?: return,
             value.toByteArray(),
             BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         )
