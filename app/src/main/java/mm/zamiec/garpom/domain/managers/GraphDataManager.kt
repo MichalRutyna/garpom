@@ -11,6 +11,7 @@ import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
 import mm.zamiec.garpom.domain.model.Parameter
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,6 +31,16 @@ class GraphDataManager @Inject constructor(
         return getAnimatedRandomlyColoredLine().copy(
             values = listOf(87.2, 85.2, 98.3, 76.5),
             label = Parameter.AIR_HUMIDITY.title,
+        )
+    }
+
+    fun getAllDates(): List<LocalDate> {
+        return listOf(
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1),
+            LocalDate.of(2023, 3, 1),
+            LocalDate.of(2023, 4, 1),
+            LocalDate.of(2023, 12, 31)
         )
     }
 

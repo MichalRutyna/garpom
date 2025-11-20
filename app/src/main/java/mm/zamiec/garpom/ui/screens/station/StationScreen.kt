@@ -7,19 +7,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Done
@@ -30,22 +26,20 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberRangeSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -53,14 +47,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.domain.model.IconType
 import mm.zamiec.garpom.domain.model.Parameter
-import mm.zamiec.garpom.ui.navigation.bottomNavItems
 import java.util.Locale
 
 @Composable
@@ -86,7 +78,9 @@ fun StationScreen(
                 onMeasurementClicked,
                 onErrorClicked,
                 onBack,
-                stationViewModel::changeChartSelection
+                stationViewModel::changeLineSelection,
+                stationViewModel::onRangeChange,
+                stationViewModel::onRangeChangeFinished,
             )
         is StationScreenUiState.Error ->
             StationErrorScreen(
@@ -105,6 +99,8 @@ private fun StationScreenContent(
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
     onChipSelected: (ParameterChipData) -> Unit,
+    onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
+    onChartTimeRangeChangeFinished: () -> Unit,
 
     ) {
     LazyColumn {
@@ -168,6 +164,8 @@ private fun StationScreenContent(
             ChartSection(
                 graphData,
                 onChipSelected,
+                onChartTimeRangeChange,
+                onChartTimeRangeChangeFinished
             )
             HorizontalDivider()
             Spacer(modifier = Modifier.padding(10.dp))
@@ -219,6 +217,8 @@ private fun StationScreenContent(
 fun ChartSection(
     graphData: GraphData,
     onChipSelected: (ParameterChipData) -> Unit,
+    onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
+    onChartTimeRangeChangeFinished: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -253,10 +253,35 @@ fun ChartSection(
                 ),
                 labelHelperProperties = LabelHelperProperties(
                     textStyle = TextStyle.Default.copy(fontSize = 12.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
+                ),
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                    labels = listOf("Apr","Mar", "May", "June"),
                 )
+            )
+            ChartDateRangeSelector(
+                graphData,
+                onChartTimeRangeChange,
+                onChartTimeRangeChangeFinished
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChartDateRangeSelector(
+    graphData: GraphData,
+    onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
+    onChartTimeRangeChangeFinished: () -> Unit,
+
+    ) {
+    RangeSlider(
+        value = graphData.graphActiveTimeRange,
+        valueRange = graphData.graphTimeRange,
+        onValueChange = onChartTimeRangeChange
+    )
 }
 
 @Composable
@@ -364,5 +389,14 @@ private fun Preview() {
             ),
         )
     )
-    StationScreenContent(uiState, graphData, {}, {}, {}, {})
+    StationScreenContent(
+        uiState,
+        graphData,
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+    )
 }

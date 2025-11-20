@@ -12,6 +12,7 @@ import ir.ehsannarmani.compose_charts.models.Line
 import mm.zamiec.garpom.domain.model.IconType
 import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -62,6 +63,9 @@ open class NotificationItemUiState(
 data class GraphData(
     val graphChips: List<ParameterChipData> = emptyList(),
     val lines: List<Line> = emptyList(),
+    val graphTimeRange: ClosedFloatingPointRange<Float> = 0f..1f, // max range
+    val graphActiveTimeRange: ClosedFloatingPointRange<Float> = 0f..1f
+
 )
 
 data class ParameterChipData(
