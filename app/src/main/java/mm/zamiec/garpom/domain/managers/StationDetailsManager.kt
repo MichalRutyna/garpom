@@ -72,7 +72,8 @@ class StationDetailsManager @Inject constructor(
                 StationScreenUiState.StationData(
                     station.name,
                     notifications = alarmNotifications,
-                    measurementList = measurements
+                    measurementList = measurements,
+
                 )
             }
         }

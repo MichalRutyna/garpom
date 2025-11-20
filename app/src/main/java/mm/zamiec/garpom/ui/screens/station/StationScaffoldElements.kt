@@ -17,7 +17,7 @@ fun stationScaffoldElements(
     ),
     onBack: () -> Unit,
 ): ScaffoldElements {
-    val uiState: StationScreenUiState by stationViewModel.uiState.collectAsState(StationScreenUiState())
+    val uiState: StationScreenUiState by stationViewModel.uiState.collectAsState(StationScreenUiState.Loading)
 
     val scaffoldElements = when(uiState) {
         is StationScreenUiState.StationData ->

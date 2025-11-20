@@ -1,48 +1,66 @@
 package mm.zamiec.garpom.ui.screens.station
 
+import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
-import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.DrawStyle
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
-import mm.zamiec.garpom.ui.screens.station.components.StationTopBar
+import mm.zamiec.garpom.R
+import mm.zamiec.garpom.domain.model.IconType
+import mm.zamiec.garpom.domain.model.Parameter
+import mm.zamiec.garpom.ui.navigation.bottomNavItems
 import java.util.Locale
 
 @Composable
@@ -57,15 +75,18 @@ fun StationScreen(
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    val uiState: StationScreenUiState by stationViewModel.uiState.collectAsState(StationScreenUiState())
+    val uiState: StationScreenUiState by stationViewModel.uiState.collectAsStateWithLifecycle(StationScreenUiState.Loading)
+    val graphData: GraphData by stationViewModel.graphdata.collectAsStateWithLifecycle()
 
     when(uiState) {
         is StationScreenUiState.StationData ->
             StationScreenContent(
                 uiState as StationScreenUiState.StationData,
+                graphData,
                 onMeasurementClicked,
                 onErrorClicked,
-                onBack
+                onBack,
+                stationViewModel::changeChartSelection
             )
         is StationScreenUiState.Error ->
             StationErrorScreen(
@@ -79,10 +100,13 @@ fun StationScreen(
 @Composable
 private fun StationScreenContent(
     uiState: StationScreenUiState.StationData,
+    graphData: GraphData,
     onMeasurementClicked: (String) -> Unit,
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
-) {
+    onChipSelected: (ParameterChipData) -> Unit,
+
+    ) {
     LazyColumn {
         item {
             Spacer(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp))
@@ -141,37 +165,10 @@ private fun StationScreenContent(
 
 
             HorizontalDivider()
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .heightIn(max = 300.dp)
-            ) {
-//                    Text("Chart here",
-//                        style = MaterialTheme.typography.headlineMedium,
-//                    )
-                LineChart(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp),
-                    data = remember {
-                        listOf(
-                            Line(
-                                label = "Windows",
-                                values = listOf(28.0, 41.0, 5.0, 10.0, 35.0),
-                                color = SolidColor(Color(0xFF23af92)),
-                                firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
-                                secondGradientFillColor = Color.Transparent,
-                                strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
-                                gradientAnimationDelay = 1000,
-                                drawStyle = DrawStyle.Stroke(width = 2.dp),
-                            )
-                        )
-                    },
-                    animationMode = AnimationMode.Together(delayBuilder = {
-                        it * 500L
-                    }),
-                )
-            }
+            ChartSection(
+                graphData,
+                onChipSelected,
+            )
             HorizontalDivider()
             Spacer(modifier = Modifier.padding(10.dp))
         }
@@ -219,6 +216,77 @@ private fun StationScreenContent(
 }
 
 @Composable
+fun ChartSection(
+    graphData: GraphData,
+    onChipSelected: (ParameterChipData) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+            .padding(bottom = 10.dp)
+            .heightIn(max = 350.dp)
+    ) {
+        Column{
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+            ) {
+                items(graphData.graphChips) { parameterChipData ->
+                    ParameterChip(
+                        parameterChipData,
+                        onChipSelected,
+                    )
+                }
+            }
+            LineChart(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 22.dp),
+                data = graphData.lines,
+                animationMode = AnimationMode.Together(delayBuilder = {
+                    it * 500L
+                }),
+                indicatorProperties = HorizontalIndicatorProperties(
+                    textStyle = TextStyle.Default.copy(fontSize = 12.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
+                ),
+                labelHelperProperties = LabelHelperProperties(
+                    textStyle = TextStyle.Default.copy(fontSize = 12.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun ParameterChip(
+    parameterChipData: ParameterChipData,
+    onChipSelected: (ParameterChipData) -> Unit,
+) {
+    FilterChip(
+        selected = parameterChipData.enabled,
+        onClick = { onChipSelected(parameterChipData) },
+        label = { Text(parameterChipData.parameter.title) },
+        leadingIcon = if (parameterChipData.enabled) {
+            { Icon(
+                imageVector = Icons.Default.Done,
+                contentDescription = parameterChipData.parameter.descriptionText
+            ) }
+        } else {
+            {
+                Icon(
+                    imageVector = iconFor(parameterChipData.parameter.icon),
+                    contentDescription = parameterChipData.parameter.descriptionText
+                )
+            }
+        },
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+    )
+}
+
+@Composable
 private fun StationErrorScreen(uiState: StationScreenUiState.Error) {
     Text("Error: ${uiState.msg}")
 }
@@ -226,14 +294,22 @@ private fun StationErrorScreen(uiState: StationScreenUiState.Error) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StationLoadingScreen() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()) {
+        modifier = Modifier.fillMaxSize()
+    ) {
         LoadingIndicator()
     }
 }
+@Composable
+fun iconFor(type: IconType): ImageVector {
+    return when (type) {
+        IconType.Dataset -> ImageVector.vectorResource(R.drawable.dataset_24)
+    }
+}
 
-
+@SuppressLint("UnrememberedMutableState")
 @Preview(showBackground = true)
 @Composable
 private fun Preview() {
@@ -252,5 +328,41 @@ private fun Preview() {
             MeasurementSummaryItemUiState(),
         ),
     )
-    StationScreenContent(uiState, {}, {}, {})
+    val graphData = GraphData(
+        graphChips = listOf(
+            ParameterChipData(
+                Parameter.TEMPERATURE,
+                Line(values = emptyList(),
+                    label = Parameter.TEMPERATURE.title,
+                    color = SolidColor(Color(0xFF23af92))
+                ),
+                enabled = true
+            ),
+            ParameterChipData(
+                Parameter.AIR_HUMIDITY,
+                Line(values = emptyList(),
+                    label = Parameter.AIR_HUMIDITY.title,
+                    color = SolidColor(Color(0xFF23af92))
+                ),
+                enabled = false
+            ),
+            ParameterChipData(
+                Parameter.AIR_HUMIDITY,
+                Line(values = emptyList(),
+                    label = Parameter.AIR_HUMIDITY.title,
+                    color = SolidColor(Color(0xFF23af92))
+                ),
+                enabled = false
+            ),
+            ParameterChipData(
+                Parameter.AIR_HUMIDITY,
+                Line(values = emptyList(),
+                    label = Parameter.AIR_HUMIDITY.title,
+                    color = SolidColor(Color(0xFF23af92))
+                ),
+                enabled = false
+            ),
+        )
+    )
+    StationScreenContent(uiState, graphData, {}, {}, {}, {})
 }

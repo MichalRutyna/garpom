@@ -1,0 +1,60 @@
+package mm.zamiec.garpom.domain.managers
+
+import androidx.compose.animation.core.EaseInOutCubic
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.unit.dp
+import ir.ehsannarmani.compose_charts.models.DrawStyle
+import ir.ehsannarmani.compose_charts.models.Line
+import mm.zamiec.garpom.data.auth.AuthRepository
+import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
+import mm.zamiec.garpom.data.dataRepositories.StationRepository
+import mm.zamiec.garpom.domain.model.Parameter
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class GraphDataManager @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val alarmRepository: AlarmRepository,
+    private val stationRepository: StationRepository,
+) {
+    fun getTemperatureGraphLine(): Line {
+        return getAnimatedRandomlyColoredLine().copy(
+            values = listOf(32.2, 33.2, 34.3, 34.5),
+            label = Parameter.TEMPERATURE.title,
+        )
+    }
+    fun getAirHumidityLine(): Line {
+        return getAnimatedRandomlyColoredLine().copy(
+            values = listOf(87.2, 85.2, 98.3, 76.5),
+            label = Parameter.AIR_HUMIDITY.title,
+        )
+    }
+
+    private val predeterminedColors = listOf(
+        Color(0xFF4E79A7),
+        Color(0xFFF28E2B),
+        Color(0xFFE15759),
+        Color(0xFF76B7B2),
+        Color(0xFF59A14F),
+        Color(0xFFEDC948),
+        Color(0xFFB07AA1))
+    companion object Counter {
+        var counter = 0
+    }
+    private fun getAnimatedRandomlyColoredLine(): Line {
+        val color = predeterminedColors[counter]
+        counter = (counter + 1) % predeterminedColors.size
+        return Line(
+            color = SolidColor(color),
+            firstGradientFillColor = color.copy(alpha = .5f),
+            secondGradientFillColor = Color.Transparent,
+            strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
+            gradientAnimationDelay = 1000,
+            drawStyle = DrawStyle.Stroke(width = 2.dp),
+            values = emptyList(),
+        )
+    }
+}

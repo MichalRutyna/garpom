@@ -93,7 +93,7 @@ fun ParameterCardContent(
                                 }${card.unit}"
                     } else {
                         // none
-                        text += "This alarm will not measure ${card.descriptionParameterName}"
+                        text += "This alarm will not check ${card.descriptionParameterName}"
                     }
                 }
 

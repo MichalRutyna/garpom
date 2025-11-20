@@ -5,25 +5,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.vector.ImageVector
+import ir.ehsannarmani.compose_charts.models.Line
+import mm.zamiec.garpom.domain.model.IconType
+import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
 
-open class StationScreenUiState {
+interface StationScreenUiState {
     data class StationData(
         val name: String = "",
 
-        //    val charts: List<Chart>,
-
         val notifications: List<NotificationItemUiState> = emptyList(),
         val measurementList: List<MeasurementSummaryItemUiState> = emptyList(),
-    ) : StationScreenUiState()
+    ) : StationScreenUiState
 
-    data class Error(val msg: String) : StationScreenUiState()
+    data class Error(val msg: String) : StationScreenUiState
 
-    data object Loading : StationScreenUiState()
+    data object Loading : StationScreenUiState
 }
 
 data class MeasurementSummaryItemUiState (
@@ -55,3 +58,14 @@ open class NotificationItemUiState(
         Icons.Filled.Info,
         "An alarm went off")
 }
+
+data class GraphData(
+    val graphChips: List<ParameterChipData> = emptyList(),
+    val lines: List<Line> = emptyList(),
+)
+
+data class ParameterChipData(
+    val parameter: Parameter,
+    val line: Line,
+    var enabled: Boolean,
+    )
