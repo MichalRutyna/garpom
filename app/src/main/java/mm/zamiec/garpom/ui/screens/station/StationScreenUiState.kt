@@ -5,14 +5,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.vector.ImageVector
 import ir.ehsannarmani.compose_charts.models.Line
-import mm.zamiec.garpom.domain.model.IconType
 import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -62,14 +58,16 @@ open class NotificationItemUiState(
 
 data class GraphData(
     val graphChips: List<ParameterChipData> = emptyList(),
-    val lines: List<Line> = emptyList(),
+    val lines: List<Line> = emptyList(), // lines currently drawn
     val graphTimeRange: ClosedFloatingPointRange<Float> = 0f..1f, // max range
-    val graphActiveTimeRange: ClosedFloatingPointRange<Float> = 0f..1f
+    val graphActiveTimeRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    val graphTimeLabels: List<String> = emptyList(),
+    val timeRangeSteps: Int = 2,
 
 )
 
 data class ParameterChipData(
     val parameter: Parameter,
-    val line: Line,
+    val line: Line, // store the full line of every parameter
     var enabled: Boolean,
     )

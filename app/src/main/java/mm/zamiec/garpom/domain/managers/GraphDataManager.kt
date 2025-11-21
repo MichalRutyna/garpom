@@ -23,13 +23,13 @@ class GraphDataManager @Inject constructor(
 ) {
     fun getTemperatureGraphLine(): Line {
         return getAnimatedRandomlyColoredLine().copy(
-            values = listOf(32.2, 33.2, 34.3, 34.5),
+            values = listOf(20.2, 33.2, 34.3, 34.5, 27.2, 12.3, -17.2),
             label = Parameter.TEMPERATURE.title,
         )
     }
     fun getAirHumidityLine(): Line {
         return getAnimatedRandomlyColoredLine().copy(
-            values = listOf(87.2, 85.2, 98.3, 76.5),
+            values = listOf(87.2, 85.2, 98.3, 76.5, 65.4, 66.1, 97.1),
             label = Parameter.AIR_HUMIDITY.title,
         )
     }
@@ -40,6 +40,8 @@ class GraphDataManager @Inject constructor(
             LocalDate.of(2023, 2, 1),
             LocalDate.of(2023, 3, 1),
             LocalDate.of(2023, 4, 1),
+            LocalDate.of(2023, 5, 1),
+            LocalDate.of(2023, 6, 1),
             LocalDate.of(2023, 12, 31)
         )
     }
@@ -62,8 +64,8 @@ class GraphDataManager @Inject constructor(
             color = SolidColor(color),
             firstGradientFillColor = color.copy(alpha = .5f),
             secondGradientFillColor = Color.Transparent,
-            strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
-            gradientAnimationDelay = 1000,
+            strokeAnimationSpec = tween(700, easing = EaseInOutCubic),
+            gradientAnimationDelay = 200,
             drawStyle = DrawStyle.Stroke(width = 2.dp),
             values = emptyList(),
         )

@@ -28,7 +28,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberRangeSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,10 +45,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.domain.model.IconType
 import mm.zamiec.garpom.domain.model.Parameter
@@ -226,7 +227,7 @@ fun ChartSection(
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
             .padding(bottom = 10.dp)
-            .heightIn(max = 350.dp)
+            .heightIn(max = 480.dp)
     ) {
         Column{
             LazyRow(
@@ -242,11 +243,11 @@ fun ChartSection(
             }
             LineChart(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
                     .padding(horizontal = 22.dp),
                 data = graphData.lines,
                 animationMode = AnimationMode.Together(delayBuilder = {
-                    it * 500L
+                    it * 200L
                 }),
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle.Default.copy(fontSize = 12.sp, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
@@ -257,13 +258,22 @@ fun ChartSection(
                 labelProperties = LabelProperties(
                     enabled = true,
                     textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                    labels = listOf("Apr","Mar", "May", "June"),
+                    labels = graphData.graphTimeLabels,
+                ),
+                dotsProperties = DotProperties(
+                    enabled = true,
+                    radius = 1.dp,
+//                    color = SolidColor(Color.Red),
+                    strokeColor = SolidColor(MaterialTheme.colorScheme.primary),
+                ),
+                zeroLineProperties = ZeroLineProperties(
+                    enabled = true,
                 )
             )
             ChartDateRangeSelector(
                 graphData,
                 onChartTimeRangeChange,
-                onChartTimeRangeChangeFinished
+                onChartTimeRangeChangeFinished,
             )
         }
     }
@@ -272,16 +282,17 @@ fun ChartSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChartDateRangeSelector(
-    graphData: GraphData,
-    onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
-    onChartTimeRangeChangeFinished: () -> Unit,
-
+        graphData: GraphData,
+        onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
+        onChartTimeRangeChangeFinished: () -> Unit,
     ) {
-    RangeSlider(
-        value = graphData.graphActiveTimeRange,
-        valueRange = graphData.graphTimeRange,
-        onValueChange = onChartTimeRangeChange
-    )
+        RangeSlider(
+            value = graphData.graphActiveTimeRange,
+            valueRange = graphData.graphTimeRange,
+            onValueChange = onChartTimeRangeChange,
+            onValueChangeFinished = onChartTimeRangeChangeFinished,
+            steps = graphData.timeRangeSteps,
+        )
 }
 
 @Composable
