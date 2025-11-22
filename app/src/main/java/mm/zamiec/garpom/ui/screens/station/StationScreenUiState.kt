@@ -58,6 +58,9 @@ open class NotificationItemUiState(
 
 data class GraphData(
     val graphChips: List<ParameterChipData> = emptyList(),
+    val periodSelections: List<PeriodSelection> = emptyList(),
+    var selectedPeriod: PeriodSelection = PeriodSelection.LastWeek,
+    var storedPeriod: PeriodSelection = PeriodSelection.LastWeek, // for ui update logic
     val lines: List<Line> = emptyList(), // lines currently drawn
     val graphTimeRange: ClosedFloatingPointRange<Float> = 0f..1f, // max range
     val graphActiveTimeRange: ClosedFloatingPointRange<Float> = 0f..1f,
@@ -71,3 +74,10 @@ data class ParameterChipData(
     val line: Line, // store the full line of every parameter
     var enabled: Boolean,
     )
+
+enum class PeriodSelection(val display: String) {
+    AllTime("All time"),
+    LastWeek("Last week"),
+    Last3Days("Last 3 days"),
+    Last24("Last 24h");
+}

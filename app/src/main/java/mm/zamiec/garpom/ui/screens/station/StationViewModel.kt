@@ -68,6 +68,8 @@ class StationViewModel @AssistedInject constructor(
                     graphTimeRange = 0f..measurements,
                     graphActiveTimeRange = _selectedGraphRange.value,
                     timeRangeSteps = measurements.toInt()-1, // 0-indexed, but end-inclusive
+                    periodSelections = listOf(
+                    )
                 )
                 )
             }
@@ -134,6 +136,17 @@ class StationViewModel @AssistedInject constructor(
     fun onRangeChangeFinished() {
         _selectedGraphRange.update { _graphData.value.graphActiveTimeRange }
         updateGraph()
+    }
+
+    fun onChartPeriodChecked(selection: PeriodSelection) {
+        _graphData.update {
+            it.copy(periodSelections = it.periodSelections.map{ period ->
+                if (period == selection)
+                    period.copy(selected = true)
+                else
+                    period.copy(selected = false)
+            })
+        }
     }
 
     @AssistedFactory

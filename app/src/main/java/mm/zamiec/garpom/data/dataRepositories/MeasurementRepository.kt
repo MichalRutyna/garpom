@@ -8,6 +8,7 @@ import mm.zamiec.garpom.data.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.data.firebase.documentAsFlow
 import mm.zamiec.garpom.data.dto.MeasurementDto
 import mm.zamiec.garpom.domain.model.Measurement
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +40,9 @@ class MeasurementRepository @Inject constructor() {
         Measurement(
             id = dto.id,
             stationId = dto.stationId,
-            date = dto.date.toDate(),
+            date = dto.date.toDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime(),
             co = dto.co,
             airHumidity = dto.airHumidity,
             groundHumidity = dto.groundHumidity,

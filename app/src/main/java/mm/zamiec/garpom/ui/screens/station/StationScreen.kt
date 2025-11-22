@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -28,6 +29,8 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,6 +86,7 @@ fun StationScreen(
                 stationViewModel::changeLineSelection,
                 stationViewModel::onRangeChange,
                 stationViewModel::onRangeChangeFinished,
+                stationViewModel::onChartPeriodChecked
             )
         is StationScreenUiState.Error ->
             StationErrorScreen(
@@ -102,7 +107,7 @@ private fun StationScreenContent(
     onChipSelected: (ParameterChipData) -> Unit,
     onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onChartTimeRangeChangeFinished: () -> Unit,
-
+    onChartPeriodChecked: (PeriodSelection) -> Unit,
     ) {
     LazyColumn {
         item {
@@ -166,7 +171,8 @@ private fun StationScreenContent(
                 graphData,
                 onChipSelected,
                 onChartTimeRangeChange,
-                onChartTimeRangeChangeFinished
+                onChartTimeRangeChangeFinished,
+                onChartPeriodChecked,
             )
             HorizontalDivider()
             Spacer(modifier = Modifier.padding(10.dp))
@@ -220,6 +226,7 @@ fun ChartSection(
     onChipSelected: (ParameterChipData) -> Unit,
     onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onChartTimeRangeChangeFinished: () -> Unit,
+    onChartPeriodChecked: (PeriodSelection) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -270,11 +277,44 @@ fun ChartSection(
                     enabled = true,
                 )
             )
+            ChartPeriodSelector(
+                graphData,
+                onChartPeriodChecked
+            )
             ChartDateRangeSelector(
                 graphData,
                 onChartTimeRangeChange,
                 onChartTimeRangeChangeFinished,
             )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ChartPeriodSelector(
+    graphData: GraphData,
+    onChartPeriodChecked: (PeriodSelection) -> Unit,
+) {
+    Row (
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween, alignment = Alignment.CenterHorizontally)
+    ) {
+        graphData.periodSelections.forEachIndexed { index, period ->
+            ToggleButton(
+                checked = period.selected,
+                onCheckedChange = { onChartPeriodChecked(period) },
+                colors = ToggleButtonDefaults.toggleButtonColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer, ),
+                shapes =
+                    when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        graphData.periodSelections.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
+            ) {
+                Text(period.name)
+            }
         }
     }
 }
@@ -398,7 +438,16 @@ private fun Preview() {
                 ),
                 enabled = false
             ),
-        )
+        ),
+        periodSelections = listOf(
+            PeriodSelection(
+                "Last week", true,
+            ),
+            PeriodSelection(
+                "Last month",
+            ),
+        ),
+
     )
     StationScreenContent(
         uiState,
@@ -408,6 +457,7 @@ private fun Preview() {
         {},
         {},
         {},
-        {}
+        {},
+        {_ ->}
     )
 }
