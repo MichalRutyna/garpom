@@ -35,11 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,7 +51,6 @@ import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.domain.model.IconType
@@ -104,7 +101,7 @@ private fun StationScreenContent(
     onMeasurementClicked: (String) -> Unit,
     onErrorClicked: (String) -> Unit,
     onBack: () -> Unit,
-    onChipSelected: (ParameterChipData) -> Unit,
+    onChipSelected: (Parameter) -> Unit,
     onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onChartTimeRangeChangeFinished: () -> Unit,
     onChartPeriodChecked: (PeriodSelection) -> Unit,
@@ -223,7 +220,7 @@ private fun StationScreenContent(
 @Composable
 fun ChartSection(
     graphData: GraphData,
-    onChipSelected: (ParameterChipData) -> Unit,
+    onChipSelected: (Parameter) -> Unit,
     onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
     onChartTimeRangeChangeFinished: () -> Unit,
     onChartPeriodChecked: (PeriodSelection) -> Unit,
@@ -241,9 +238,10 @@ fun ChartSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
             ) {
-                items(graphData.graphChips) { parameterChipData ->
+                items(Parameter.entries) { parameter ->
                     ParameterChip(
-                        parameterChipData,
+                        graphData,
+                        parameter,
                         onChipSelected,
                     )
                 }
@@ -301,19 +299,19 @@ private fun ChartPeriodSelector(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween, alignment = Alignment.CenterHorizontally)
     ) {
-        graphData.periodSelections.forEachIndexed { index, period ->
+        PeriodSelection.entries.forEachIndexed { index, period ->
             ToggleButton(
-                checked = period.selected,
+                checked = graphData.selectedPeriod == period,
                 onCheckedChange = { onChartPeriodChecked(period) },
-                colors = ToggleButtonDefaults.toggleButtonColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer, ),
+                colors = ToggleButtonDefaults.toggleButtonColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer ),
                 shapes =
                     when (index) {
                         0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                        graphData.periodSelections.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        PeriodSelection.entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                         else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                     },
             ) {
-                Text(period.name)
+                Text(period.display, maxLines = 1)
             }
         }
     }
@@ -337,23 +335,25 @@ private fun ChartDateRangeSelector(
 
 @Composable
 fun ParameterChip(
-    parameterChipData: ParameterChipData,
-    onChipSelected: (ParameterChipData) -> Unit,
+    graphData: GraphData,
+    parameter: Parameter,
+    onChipSelected: (Parameter) -> Unit,
 ) {
+    val selected = graphData.enabledParameters.contains(parameter)
     FilterChip(
-        selected = parameterChipData.enabled,
-        onClick = { onChipSelected(parameterChipData) },
-        label = { Text(parameterChipData.parameter.title) },
-        leadingIcon = if (parameterChipData.enabled) {
+        selected = selected,
+        onClick = { onChipSelected(parameter) },
+        label = { Text(parameter.title) },
+        leadingIcon = if (selected) {
             { Icon(
                 imageVector = Icons.Default.Done,
-                contentDescription = parameterChipData.parameter.descriptionText
+                contentDescription = parameter.descriptionText
             ) }
         } else {
             {
                 Icon(
-                    imageVector = iconFor(parameterChipData.parameter.icon),
-                    contentDescription = parameterChipData.parameter.descriptionText
+                    imageVector = iconFor(parameter.icon),
+                    contentDescription = parameter.descriptionText
                 )
             }
         },
@@ -404,51 +404,7 @@ private fun Preview() {
             MeasurementSummaryItemUiState(),
         ),
     )
-    val graphData = GraphData(
-        graphChips = listOf(
-            ParameterChipData(
-                Parameter.TEMPERATURE,
-                Line(values = emptyList(),
-                    label = Parameter.TEMPERATURE.title,
-                    color = SolidColor(Color(0xFF23af92))
-                ),
-                enabled = true
-            ),
-            ParameterChipData(
-                Parameter.AIR_HUMIDITY,
-                Line(values = emptyList(),
-                    label = Parameter.AIR_HUMIDITY.title,
-                    color = SolidColor(Color(0xFF23af92))
-                ),
-                enabled = false
-            ),
-            ParameterChipData(
-                Parameter.AIR_HUMIDITY,
-                Line(values = emptyList(),
-                    label = Parameter.AIR_HUMIDITY.title,
-                    color = SolidColor(Color(0xFF23af92))
-                ),
-                enabled = false
-            ),
-            ParameterChipData(
-                Parameter.AIR_HUMIDITY,
-                Line(values = emptyList(),
-                    label = Parameter.AIR_HUMIDITY.title,
-                    color = SolidColor(Color(0xFF23af92))
-                ),
-                enabled = false
-            ),
-        ),
-        periodSelections = listOf(
-            PeriodSelection(
-                "Last week", true,
-            ),
-            PeriodSelection(
-                "Last month",
-            ),
-        ),
-
-    )
+    val graphData = GraphData()
     StationScreenContent(
         uiState,
         graphData,

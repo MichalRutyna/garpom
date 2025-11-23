@@ -39,6 +39,8 @@ import mm.zamiec.garpom.ui.screens.measurement.components.FireCard
 import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCard
 import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCardFactory
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -214,8 +216,11 @@ private fun DateSubtitle(uiState: MeasurementScreenState.MeasurementData) {
             .padding(end = 10.dp)
     ) {
         Text(
-            text = SimpleDateFormat("EEEE, d MMMM yyyy, HH:mm", Locale.getDefault())
-                .format(uiState.date)
+            text = uiState.date
+                .format(
+                    DateTimeFormatter.ofPattern(
+                        "EEEE, d MMMM yyyy, HH:mm",
+                        Locale.getDefault()))
                 .replaceFirstChar {
                     it.uppercaseChar()
                 },
@@ -241,7 +246,7 @@ private fun MeasurementLoadingScreen() {
 fun Preview() {
     val uistate = MeasurementScreenState.MeasurementData(
         stationName = "Test test test station",
-        date = Date.from(Instant.now()),
+        date = LocalDateTime.now(),
         cards = listOf(
             MeasurementCardFactory.create(
                 Parameter.TEMPERATURE,

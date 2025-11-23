@@ -1,5 +1,6 @@
 package mm.zamiec.garpom.ui.screens.station
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,8 +40,6 @@ class StationViewModel @AssistedInject constructor(
     private val _graphData = MutableStateFlow(GraphData())
     val graphdata: StateFlow<GraphData> = _graphData
 
-    val allDates: List<LocalDate> = graphDataManager.getAllDates()
-
     private val _selectedGraphRange = MutableStateFlow(0f..1f)
 
     init {
@@ -49,29 +48,9 @@ class StationViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val stationDetailsFlow = stationDetailsManager.stationDetails(stationId)
 
-            val graphDataFlow = flow { // create a one-shot flow so we can combine
-                val measurements = allDates.size.toFloat()
-                _selectedGraphRange.value = max(measurements - 7f, 0f)..measurements // default to last week
-                emit(GraphData(
-                    graphChips = listOf(
-                        ParameterChipData(
-                            Parameter.TEMPERATURE,
-                            graphDataManager.getTemperatureGraphLine(),
-                            enabled = true
-                        ),
-                        ParameterChipData(
-                            Parameter.AIR_HUMIDITY,
-                            graphDataManager.getAirHumidityLine(),
-                            enabled = false
-                        ),
-                    ),
-                    graphTimeRange = 0f..measurements,
-                    graphActiveTimeRange = _selectedGraphRange.value,
-                    timeRangeSteps = measurements.toInt()-1, // 0-indexed, but end-inclusive
-                    periodSelections = listOf(
-                    )
-                )
-                )
+            // create a one-shot flow so we can combine, and keep listening to details
+            val graphDataFlow = flow {
+                emit(graphDataManager.initialGraph(PeriodSelection.LastWeek, setOf(Parameter.TEMPERATURE)))
             }
 
             combine(
@@ -82,70 +61,45 @@ class StationViewModel @AssistedInject constructor(
             }.collect { (details, graph) ->
                 _graphData.value = graph
                 _uiState.value = details
-
-                updateGraph()
             }
         }
     }
 
     private fun updateGraph() {
-        val newLines = mutableListOf<Line>()
-        val start = _selectedGraphRange.value.start.toInt()
-        val end = _selectedGraphRange.value.endInclusive.toInt()
-
-        newLines.addAll(
-            _graphData.value.graphChips
-                .filter { it.enabled }
-                .map {
-                    it.line
-                        .copy(values = it.line.values.subList(start, end))
-                        .copy(strokeProgress = Animatable(0f), gradientProgress = Animatable(0f)) // reset line animation
-                }
-        )
-        val formatter = DateTimeFormatter.ofPattern("MMM dd", Locale.getDefault())
-        _graphData.update { data ->
-            data.copy(
-                lines = newLines,
-                graphTimeLabels = allDates
-                    .subList(start, end)
-                    .map {
-                        it.format(formatter)
-                    }
-            )
-        }
+        _graphData.value = graphDataManager.updateData(_graphData.value)
     }
 
-    fun changeLineSelection(graphChip: ParameterChipData) {
+    fun changeLineSelection(parameter: Parameter) {
         _graphData.update { state ->
             state.copy(
-                graphChips = state.graphChips.map { chip ->
-                    if (chip.parameter == graphChip.parameter) {
-                        chip.copy(enabled = !chip.enabled)
-                    } else chip
-                }
+                enabledParameters =
+                    if (state.enabledParameters.contains(parameter))
+                        state.enabledParameters.minus(parameter)
+                    else
+                        state.enabledParameters.plus(parameter)
             )
         }
         updateGraph()
     }
-    fun onRangeChange(range: ClosedFloatingPointRange<Float>) {
-        _graphData.update {
-            it.copy(graphActiveTimeRange = range)
-        }
-    }
 
     fun onRangeChangeFinished() {
         _selectedGraphRange.update { _graphData.value.graphActiveTimeRange }
+        Log.d(TAG, "New range: " + _selectedGraphRange.value)
         updateGraph()
     }
 
     fun onChartPeriodChecked(selection: PeriodSelection) {
         _graphData.update {
-            it.copy(periodSelections = it.periodSelections.map{ period ->
-                if (period == selection)
-                    period.copy(selected = true)
-                else
-                    period.copy(selected = false)
-            })
+            it.copy(
+                selectedPeriod = selection
+            )
+        }
+        updateGraph()
+    }
+
+    fun onRangeChange(range: ClosedFloatingPointRange<Float>) {
+        _graphData.update {
+            it.copy(graphActiveTimeRange = range)
         }
     }
 

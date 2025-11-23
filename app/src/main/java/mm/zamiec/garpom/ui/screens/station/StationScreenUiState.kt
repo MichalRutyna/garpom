@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import ir.ehsannarmani.compose_charts.models.Line
 import mm.zamiec.garpom.domain.model.Parameter
 import java.time.Instant
+import java.time.LocalDateTime
 import java.util.Date
 import java.util.Locale
 
@@ -27,7 +28,7 @@ interface StationScreenUiState {
 }
 
 data class MeasurementSummaryItemUiState (
-    val date: Date = Date.from(Instant.now()),
+    val date: LocalDateTime = LocalDateTime.now(),
     val measurementId: String = "",
 )
 
@@ -43,7 +44,7 @@ open class NotificationItemUiState(
 
     data class AlarmNotification(
         val measurementId: String = "",
-        val measurementDate: Date = Date.from(Instant.now()),
+        val measurementDate: LocalDateTime = LocalDateTime.now(),
         val alarmName: String = "",
     ) : NotificationItemUiState(
         "Alarm \"$alarmName\" went off on ${
@@ -57,8 +58,7 @@ open class NotificationItemUiState(
 }
 
 data class GraphData(
-    val graphChips: List<ParameterChipData> = emptyList(),
-    val periodSelections: List<PeriodSelection> = emptyList(),
+    val enabledParameters: Set<Parameter> = emptySet(),
     var selectedPeriod: PeriodSelection = PeriodSelection.LastWeek,
     var storedPeriod: PeriodSelection = PeriodSelection.LastWeek, // for ui update logic
     val lines: List<Line> = emptyList(), // lines currently drawn
@@ -68,12 +68,6 @@ data class GraphData(
     val timeRangeSteps: Int = 2,
 
 )
-
-data class ParameterChipData(
-    val parameter: Parameter,
-    val line: Line, // store the full line of every parameter
-    var enabled: Boolean,
-    )
 
 enum class PeriodSelection(val display: String) {
     AllTime("All time"),
