@@ -1,7 +1,6 @@
 package mm.zamiec.garpom.ui.screens.station
 
 import android.annotation.SuppressLint
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +54,7 @@ import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import mm.zamiec.garpom.R
 import mm.zamiec.garpom.domain.model.IconType
 import mm.zamiec.garpom.domain.model.Parameter
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
@@ -200,11 +200,7 @@ private fun StationScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    SimpleDateFormat(
-                        "d MMMM, HH:mm",
-                        Locale.getDefault()
-                    )
-                        .format(measurement.date),
+                    measurement.date.format(DateTimeFormatter.ofPattern("d MMMM, HH:mm")),
                     modifier = Modifier.weight(1f)
                 )
                 Icon(

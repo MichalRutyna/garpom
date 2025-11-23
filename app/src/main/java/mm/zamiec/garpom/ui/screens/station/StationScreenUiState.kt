@@ -1,6 +1,5 @@
 package mm.zamiec.garpom.ui.screens.station
 
-import android.icu.text.SimpleDateFormat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
@@ -8,10 +7,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import ir.ehsannarmani.compose_charts.models.Line
 import mm.zamiec.garpom.domain.model.Parameter
-import java.time.Instant
 import java.time.LocalDateTime
-import java.util.Date
-import java.util.Locale
+import java.time.format.DateTimeFormatter
 
 
 interface StationScreenUiState {
@@ -48,13 +45,11 @@ open class NotificationItemUiState(
         val alarmName: String = "",
     ) : NotificationItemUiState(
         "Alarm \"$alarmName\" went off on ${
-            SimpleDateFormat(
-                "MMM dd",
-                Locale.getDefault())
-                .format(measurementDate)
+            measurementDate.format(DateTimeFormatter.ofPattern("MMM dd"))
         }",
         Icons.Filled.Info,
-        "An alarm went off")
+        "An alarm went off") {
+    }
 }
 
 data class GraphData(

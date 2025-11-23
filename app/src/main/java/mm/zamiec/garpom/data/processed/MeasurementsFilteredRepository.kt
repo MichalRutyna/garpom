@@ -1,5 +1,6 @@
 package mm.zamiec.garpom.data.processed
 
+import android.util.Log
 import kotlinx.coroutines.flow.first
 import mm.zamiec.garpom.data.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.domain.model.Average
@@ -39,6 +40,7 @@ class MeasurementsFilteredRepository @Inject constructor(
                     ph = list.mapNotNull { it.ph }.average(),
                 )
             }
+        Log.d("filteredRepo", dailyAverages.toString())
         return dailyAverages
     }
 

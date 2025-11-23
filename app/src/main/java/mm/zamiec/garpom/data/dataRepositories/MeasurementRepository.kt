@@ -73,6 +73,7 @@ class MeasurementRepository @Inject constructor() {
         return queryAsFlow(
             db
                 .collection("measurements")
+                .whereEqualTo("station_id", stationId)
                 .whereGreaterThanOrEqualTo("date", startTimestamp)
                 .whereLessThanOrEqualTo("date", endTimestamp)
                 .orderBy("date"),

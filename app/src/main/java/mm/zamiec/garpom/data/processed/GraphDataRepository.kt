@@ -66,6 +66,14 @@ class GraphDataRepository @Inject constructor(
         return response
     }
 
+    fun Double.nanSafe(): Double? {
+        return if (!this.isNaN()) {
+            this
+        } else {
+            null
+        }
+    }
+
     private suspend fun getDailyResponseForParameterInTimeRange(stationId: String, start: LocalDateTime, end: LocalDateTime): RepositoryResponse {
         val measurements: Map<LocalDate, Average> =
             measurementsFilteredRepository
@@ -75,13 +83,13 @@ class GraphDataRepository @Inject constructor(
             Parameter.entries.associateWith { parameter ->
                 measurements.mapNotNull { (date, average) ->
                     when (parameter) {
-                        Parameter.TEMPERATURE -> average.temperature
-                        Parameter.AIR_HUMIDITY -> average.airHumidity
-                        Parameter.CO -> average.co
-                        Parameter.GROUND_HUMIDITY -> average.groundHumidity
-                        Parameter.LIGHT -> average.light
-                        Parameter.PH -> average.ph
-                        Parameter.PRESSURE -> average.pressure
+                        Parameter.TEMPERATURE -> average.temperature.nanSafe()
+                        Parameter.AIR_HUMIDITY -> average.airHumidity.nanSafe()
+                        Parameter.CO -> average.co.nanSafe()
+                        Parameter.GROUND_HUMIDITY -> average.groundHumidity.nanSafe()
+                        Parameter.LIGHT -> average.light.nanSafe()
+                        Parameter.PH -> average.ph.nanSafe()
+                        Parameter.PRESSURE -> average.pressure.nanSafe()
                     }
                 }
             }
@@ -115,13 +123,13 @@ class GraphDataRepository @Inject constructor(
             Parameter.entries.associateWith { parameter ->
                 measurements.mapNotNull { (date, average) ->
                     when (parameter) {
-                        Parameter.TEMPERATURE -> average.temperature
-                        Parameter.AIR_HUMIDITY -> average.airHumidity
-                        Parameter.CO -> average.co
-                        Parameter.GROUND_HUMIDITY -> average.groundHumidity
-                        Parameter.LIGHT -> average.light
-                        Parameter.PH -> average.ph
-                        Parameter.PRESSURE -> average.pressure
+                        Parameter.TEMPERATURE -> average.temperature.nanSafe()
+                        Parameter.AIR_HUMIDITY -> average.airHumidity.nanSafe()
+                        Parameter.CO -> average.co.nanSafe()
+                        Parameter.GROUND_HUMIDITY -> average.groundHumidity.nanSafe()
+                        Parameter.LIGHT -> average.light.nanSafe()
+                        Parameter.PH -> average.ph.nanSafe()
+                        Parameter.PRESSURE -> average.pressure.nanSafe()
                     }
                 }
             }
