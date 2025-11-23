@@ -1,14 +1,12 @@
 package mm.zamiec.garpom.ui.screens.station
 
 import android.util.Log
-import androidx.compose.animation.core.Animatable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.ehsannarmani.compose_charts.models.Line
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -19,10 +17,6 @@ import mm.zamiec.garpom.data.auth.AuthRepository
 import mm.zamiec.garpom.domain.managers.GraphDataManager
 import mm.zamiec.garpom.domain.managers.StationDetailsManager
 import mm.zamiec.garpom.domain.model.Parameter
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.math.max
 
 @HiltViewModel(assistedFactory = StationViewModel.Factory::class)
 class StationViewModel @AssistedInject constructor(
@@ -47,10 +41,9 @@ class StationViewModel @AssistedInject constructor(
         _uiState.value = StationScreenUiState.Loading
         viewModelScope.launch {
             val stationDetailsFlow = stationDetailsManager.stationDetails(stationId)
-
             // create a one-shot flow so we can combine, and keep listening to details
             val graphDataFlow = flow {
-                emit(graphDataManager.initialGraph(PeriodSelection.LastWeek, setOf(Parameter.TEMPERATURE)))
+                emit(graphDataManager.initialGraph(stationId, PeriodSelection.LastWeek, setOf(Parameter.TEMPERATURE)))
             }
 
             combine(
@@ -66,7 +59,9 @@ class StationViewModel @AssistedInject constructor(
     }
 
     private fun updateGraph() {
-        _graphData.value = graphDataManager.updateData(_graphData.value)
+        viewModelScope.launch {
+            _graphData.value = graphDataManager.updateData(stationId,_graphData.value)
+        }
     }
 
     fun changeLineSelection(parameter: Parameter) {

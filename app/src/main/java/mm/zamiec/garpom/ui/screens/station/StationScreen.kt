@@ -324,6 +324,14 @@ private fun ChartDateRangeSelector(
         onChartTimeRangeChange: (ClosedFloatingPointRange<Float>) -> Unit,
         onChartTimeRangeChangeFinished: () -> Unit,
     ) {
+    if (graphData.timeRangeSteps > 24) {
+        RangeSlider(
+            value = graphData.graphActiveTimeRange,
+            valueRange = graphData.graphTimeRange,
+            onValueChange = onChartTimeRangeChange,
+            onValueChangeFinished = onChartTimeRangeChangeFinished,
+        )
+    } else if (graphData.timeRangeSteps > 0) {
         RangeSlider(
             value = graphData.graphActiveTimeRange,
             valueRange = graphData.graphTimeRange,
@@ -331,6 +339,10 @@ private fun ChartDateRangeSelector(
             onValueChangeFinished = onChartTimeRangeChangeFinished,
             steps = graphData.timeRangeSteps,
         )
+    } else {
+        Text("No measurements found!", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+    }
+
 }
 
 @Composable

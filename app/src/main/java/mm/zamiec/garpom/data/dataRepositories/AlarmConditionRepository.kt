@@ -49,7 +49,7 @@ class AlarmConditionRepository @Inject constructor() {
         )
     }
 
-    // TODO?
+    // Manual queries, because they query a subcollection
     fun getConditionById(conditionId: String, alarmId: String): Flow<AlarmCondition?> =
         callbackFlow {
             val listener: ListenerRegistration = db.collection("alarms")

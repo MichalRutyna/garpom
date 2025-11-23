@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.Line
 import mm.zamiec.garpom.data.processed.GraphDataRepository
+import mm.zamiec.garpom.data.processed.RepositoryResponse
 import mm.zamiec.garpom.domain.model.Parameter
 import mm.zamiec.garpom.ui.screens.station.GraphData
 import mm.zamiec.garpom.ui.screens.station.PeriodSelection
@@ -23,112 +24,126 @@ import kotlin.math.max
 class GraphDataManager @Inject constructor(
     private val graphDataRepository: GraphDataRepository
 ) {
+    final val LOCAL_EPOCH = LocalDateTime.of(2025, 1, 1, 0, 0)
+    suspend fun initialGraph(stationId: String, period: PeriodSelection, enabledParameters: Set<Parameter>): GraphData {
+        val rangeStart: LocalDateTime =
+            getInitialTimeRangeStartInPeriodSelection(period)
+        val rangeEnd: LocalDateTime =
+            LocalDateTime.now()
 
-
-    fun initialGraph(period: PeriodSelection, enabledParameters: Set<Parameter>): GraphData {
+        val repositoryResponse = graphDataRepository
+            .getResponseForParameterInTimeRangeAndPeriodSelection(
+                stationId, period, rangeStart, rangeEnd
+            )
         val timeUnitCount: Int =
-            graphDataRepository.getTimeUnitCountForPeriodSelection(period)
+            repositoryResponse.count
         val initialTimeRangeStart: Int =
-            getInitialTimeRangeStartInPeriodSelection(period, timeUnitCount)
+            getStartValueOfInitialTimeRangeInPeriodSelection(period, timeUnitCount)
 
+        val x = when (period) {
+            PeriodSelection.AllTime -> ChronoUnit.WEEKS.between(LOCAL_EPOCH, LocalDateTime.now()).toInt()
+            PeriodSelection.LastWeek -> 7
+            PeriodSelection.Last3Days -> 56
+            PeriodSelection.Last24 -> 24
+        }
 
         val data = GraphData(
             selectedPeriod = period,
             storedPeriod = period,
             enabledParameters = enabledParameters,
-            graphTimeRange = 0f..timeUnitCount.toFloat(), // 0-indexed
-            graphActiveTimeRange = initialTimeRangeStart.toFloat()..timeUnitCount.toFloat(),
-            timeRangeSteps = timeUnitCount-1, // allows x values evenly distributed
+            graphTimeRange = 0f..x.toFloat(), // 0-indexed
+            graphActiveTimeRange = initialTimeRangeStart.toFloat()..x.toFloat(),
+            timeRangeSteps = x-1, // allows x values evenly distributed
         )
-        return updateLinesAndLabels(data)
+        return updateLinesAndLabels(stationId,data, repositoryResponse)
     }
 
-    fun updateData(graphData: GraphData): GraphData {
+    suspend fun updateData(stationId: String, graphData: GraphData): GraphData {
         // period selector changed
         if (graphData.selectedPeriod != graphData.storedPeriod)
-            return initialGraph(graphData.selectedPeriod, graphData.enabledParameters)
+            return initialGraph(stationId, graphData.selectedPeriod, graphData.enabledParameters)
 
-        return updateLinesAndLabels(graphData)
+        return updateLinesAndLabels(stationId, graphData)
     }
 
-    private fun updateLinesAndLabels(graphData: GraphData): GraphData {
+    private suspend fun updateLinesAndLabels(stationId: String, graphData: GraphData, repositoryResponse: RepositoryResponse? = null): GraphData {
         val (rangeStart: LocalDateTime, rangeEnd: LocalDateTime) =
-            getTimeRangeFromTimeSliderInPeriodSelection(graphData)
+            getTimeRangeFromTimeSliderInPeriodSelection(graphData.selectedPeriod, graphData.graphActiveTimeRange)
+
+        val data = repositoryResponse
+            ?: graphDataRepository // if not called from initialGraph
+            .getResponseForParameterInTimeRangeAndPeriodSelection(
+                stationId, graphData.selectedPeriod, rangeStart, rangeEnd
+            )
+
         val newLines = mutableListOf<Line>()
         newLines.addAll(
             graphData.enabledParameters
                 .map {
                     getLineForParameter(it)
                         .copy(
-                            values = graphDataRepository
-                                .getValuesForParameterInTimeRangeAndPeriodSelection(
-                                    it,
-                                    graphData.selectedPeriod,
-                                    rangeStart, rangeEnd
-                                ), // slider changed
+                            values = data.values[it] ?: emptyList(),
                             label = it.title,
                             strokeProgress = Animatable(0f), gradientProgress = Animatable(0f) // reset line animation
                         )
                 }
         )
-        val newLabels =
-            graphDataRepository
-                .getLabelsForPeriodSelectionInTimeRange(
-                    graphData.selectedPeriod,
-                    rangeStart, rangeEnd
-                )
 
         return graphData.copy(
             lines = newLines,
-            graphTimeLabels = newLabels,
+            graphTimeLabels = data.labels,
         )
     }
 
-    private fun getTimeRangeFromTimeSliderInPeriodSelection(graphData: GraphData): Pair<LocalDateTime, LocalDateTime> {
+    private fun getTimeRangeFromTimeSliderInPeriodSelection(periodSelection: PeriodSelection, timeRange: ClosedFloatingPointRange<Float>): Pair<LocalDateTime, LocalDateTime> {
         val firstDate: LocalDateTime
         val rangeStart: LocalDateTime
         val rangeEnd: LocalDateTime
 
-        when (graphData.selectedPeriod) {
+        when (periodSelection) {
             PeriodSelection.AllTime -> {
-                firstDate = LocalDateTime.now().minusYears(9999)
-                rangeStart = firstDate.plusWeeks(graphData.graphActiveTimeRange.start.toLong())
-                rangeEnd = firstDate.plusWeeks(graphData.graphActiveTimeRange.endInclusive.toLong())
+                firstDate = LOCAL_EPOCH
+                rangeStart = firstDate.plusWeeks(timeRange.start.toLong())
+                rangeEnd = firstDate.plusWeeks(timeRange.endInclusive.toLong()+1) // include this week
             }
 
             PeriodSelection.LastWeek -> {
                 firstDate = LocalDateTime.now().minusWeeks(1).withHour(0).withMinute(0)
-                rangeStart = firstDate.plusDays(graphData.graphActiveTimeRange.start.toLong())
-                rangeEnd = firstDate.plusDays(graphData.graphActiveTimeRange.endInclusive.toLong())
+                rangeStart = firstDate.plusDays(timeRange.start.toLong())
+                rangeEnd = firstDate.plusDays(timeRange.endInclusive.toLong())
             }
 
             PeriodSelection.Last3Days -> {
                 firstDate = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0)
-                rangeStart = firstDate.plusHours(graphData.graphActiveTimeRange.start.toLong())
-                rangeEnd = firstDate.plusHours(graphData.graphActiveTimeRange.endInclusive.toLong())
+                rangeStart = firstDate.plusHours(timeRange.start.toLong())
+                rangeEnd = firstDate.plusHours(timeRange.endInclusive.toLong())
             }
 
             PeriodSelection.Last24 -> {
                 firstDate = LocalDateTime.now().minusHours(24).withMinute(0)
-                rangeStart = firstDate.plusHours(graphData.graphActiveTimeRange.start.toLong())
-                rangeEnd = firstDate.plusHours(graphData.graphActiveTimeRange.endInclusive.toLong())
+                rangeStart = firstDate.plusHours(timeRange.start.toLong())
+                rangeEnd = firstDate.plusHours(timeRange.endInclusive.toLong())
             }
         }
         return Pair(rangeStart, rangeEnd)
     }
 
-    private fun getInitialTimeRangeStartInPeriodSelection(periodSelection: PeriodSelection, timeUnitCount: Int): Int {
+    private fun getInitialTimeRangeStartInPeriodSelection(periodSelection: PeriodSelection): LocalDateTime {
+        return when (periodSelection) {
+            PeriodSelection.AllTime ->
+                LocalDateTime.now().minusYears(1)
+            PeriodSelection.LastWeek ->
+                LocalDateTime.now().minusWeeks(1).withHour(0).withMinute(0)
+            PeriodSelection.Last3Days ->
+                LocalDateTime.now().minusDays(3).withHour(0).withMinute(0)
+            PeriodSelection.Last24 ->
+                LocalDateTime.now().minusHours(24).withMinute(0)
+        }
+    }
+
+    private fun getStartValueOfInitialTimeRangeInPeriodSelection(periodSelection: PeriodSelection, timeUnitCount: Int): Int {
         val initialDateTime: LocalDateTime =
-            when (periodSelection) {
-                PeriodSelection.AllTime ->
-                    LocalDateTime.now().minusYears(1)
-                PeriodSelection.LastWeek ->
-                    LocalDateTime.now().minusWeeks(1)
-                PeriodSelection.Last3Days ->
-                    LocalDateTime.now().minusDays(3)
-                PeriodSelection.Last24 ->
-                    LocalDateTime.now().minusHours(24)
-            }
+            getInitialTimeRangeStartInPeriodSelection(periodSelection)
         val now = LocalDateTime.now()
         val timeUnitDifference =
             when (periodSelection) {

@@ -1,13 +1,17 @@
 package mm.zamiec.garpom.data.dataRepositories
 
+import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.Flow
 import mm.zamiec.garpom.data.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.data.firebase.documentAsFlow
 import mm.zamiec.garpom.data.dto.MeasurementDto
+import mm.zamiec.garpom.data.firebase.queryAsFlow
 import mm.zamiec.garpom.domain.model.Measurement
+import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,4 +63,21 @@ class MeasurementRepository @Inject constructor() {
     fun getMeasurementsByStation(stationId: String): Flow<List<Measurement>> =
         db.filteredCollectionAsFlow("measurements",
             "station_id", stationId, ::dtoMapper, ::domainMapper)
+
+    fun getMeasurementsByStationBetweenDates(stationId: String, start: LocalDateTime, end: LocalDateTime): Flow<List<Measurement>> {
+        val startTimestamp = Timestamp(start.atZone(ZoneId.systemDefault()).toInstant())
+        val endTimestamp = Timestamp(end.atZone(ZoneId.systemDefault()).toInstant())
+
+        Log.d("MeasRepo", "start: " + startTimestamp.toDate() + " end: " + endTimestamp.toDate())
+
+        return queryAsFlow(
+            db
+                .collection("measurements")
+                .whereGreaterThanOrEqualTo("date", startTimestamp)
+                .whereLessThanOrEqualTo("date", endTimestamp)
+                .orderBy("date"),
+            ::dtoMapper,
+            ::domainMapper
+        )
+    }
 }
