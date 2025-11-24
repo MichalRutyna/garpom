@@ -23,7 +23,11 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun MeasurementFabMenu(fabMenuExpanded: Boolean, onToggleFab: () -> Unit) {
+fun MeasurementFabMenu(
+    fabMenuExpanded: Boolean,
+    onToggleFab: () -> Unit,
+    onDelete: () -> Unit,
+) {
     FloatingActionButtonMenu(
         expanded = fabMenuExpanded,
         button = {
@@ -51,7 +55,7 @@ fun MeasurementFabMenu(fabMenuExpanded: Boolean, onToggleFab: () -> Unit) {
     ) {
         FloatingActionButtonMenuItem(
             onClick = {
-                // TODO
+                onDelete()
             },
             text = { Text("Delete") },
             icon = { Icon(Icons.Filled.Delete, contentDescription = null) }

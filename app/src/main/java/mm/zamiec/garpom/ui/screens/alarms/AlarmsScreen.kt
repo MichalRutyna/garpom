@@ -59,7 +59,7 @@ private fun AlarmsScreenContent(
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         item {
-            AlarmTitle()
+//            AlarmTitle()
             HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }
         uiState.stationAlarmsList.forEach {

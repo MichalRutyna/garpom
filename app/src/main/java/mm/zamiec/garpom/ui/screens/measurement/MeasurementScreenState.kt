@@ -18,6 +18,8 @@ open class MeasurementScreenState () {
     data class Error(val message: String) : MeasurementScreenState()
 
     object Loading : MeasurementScreenState()
+
+    object Deleted: MeasurementScreenState()
 }
 
 data class TriggeredAlarm(

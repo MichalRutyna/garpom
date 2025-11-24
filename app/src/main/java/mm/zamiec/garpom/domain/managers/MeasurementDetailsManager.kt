@@ -2,12 +2,15 @@ package mm.zamiec.garpom.domain.managers
 
 
 import android.util.Log
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import mm.zamiec.garpom.data.dataRepositories.AlarmConditionRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
 import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.data.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
+import mm.zamiec.garpom.domain.model.Measurement
 import mm.zamiec.garpom.ui.screens.measurement.components.FireCard
 import mm.zamiec.garpom.ui.screens.measurement.components.MeasurementCardFactory
 import mm.zamiec.garpom.ui.screens.measurement.MeasurementScreenState
@@ -81,6 +84,16 @@ class MeasurementDetailsManager @Inject constructor(
             )
         } catch (e: Exception) {
             MeasurementScreenState.Error(e.message ?: "Unknown error")
+        }
+    }
+
+    suspend fun deleteMeasurement(measurementId: String): MeasurementScreenState {
+        try {
+            // don't delete test data
+//            measurementRepository.deleteMeasurement(measurementId).first()
+            return MeasurementScreenState.Deleted
+        } catch (e: Exception) {
+            return MeasurementScreenState.Error(e.message ?: "Unknown error")
         }
     }
 }

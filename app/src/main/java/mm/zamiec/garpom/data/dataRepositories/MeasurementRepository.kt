@@ -5,7 +5,10 @@ import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import mm.zamiec.garpom.data.firebase.filteredCollectionAsFlow
 import mm.zamiec.garpom.data.firebase.documentAsFlow
 import mm.zamiec.garpom.data.dto.MeasurementDto
@@ -80,5 +83,20 @@ class MeasurementRepository @Inject constructor() {
             ::dtoMapper,
             ::domainMapper
         )
+    }
+
+    fun deleteMeasurement(measurementId: String) = callbackFlow<Unit> {
+        val docRef = db.collection("measurements").document(measurementId)
+
+        docRef.delete()
+            .addOnSuccessListener {
+                trySend(Unit)
+                close()
+            }
+            .addOnFailureListener { e ->
+                close(e)
+            }
+
+        awaitClose { }
     }
 }

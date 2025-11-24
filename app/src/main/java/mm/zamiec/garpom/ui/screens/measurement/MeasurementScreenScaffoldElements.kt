@@ -1,5 +1,6 @@
 package mm.zamiec.garpom.ui.screens.measurement
 
+import android.icu.util.Measure
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,8 +23,8 @@ fun measurementScreenScaffoldElements(
 
     val scaffoldElements: ScaffoldElements = when (uiState) {
         is MeasurementScreenState.Loading -> ScaffoldElements()
+        is MeasurementScreenState.Deleted -> ScaffoldElements()
         // TODO empty top bar?
-        is MeasurementScreenState.Error -> ScaffoldElements()
         is MeasurementScreenState.MeasurementData -> {
             ScaffoldElements(
                 topBar = {
@@ -32,7 +33,8 @@ fun measurementScreenScaffoldElements(
                 fab = {
                     MeasurementFabMenu(
                         measurementViewModel.fabMenuExpanded.collectAsState().value,
-                        measurementViewModel::toggleFabMenu
+                        measurementViewModel::toggleFabMenu,
+                        measurementViewModel::deleteMeasurement
                     )
                 }
             )

@@ -58,6 +58,8 @@ fun MeasurementScreen(
     val uiState: MeasurementScreenState by measurementViewModel.uiState.collectAsState()
 
     when (uiState) {
+        is MeasurementScreenState.Deleted ->
+            onBack()
         is MeasurementScreenState.Loading ->
             MeasurementLoadingScreen()
         is MeasurementScreenState.MeasurementData -> {

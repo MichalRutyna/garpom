@@ -79,12 +79,12 @@ fun AuthRouteController(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column {
-            Text("State: "+uiState)
-            Text("Stack: "+backStack.toList())
-            Text("IsInSub: "+isInSubNavigation.value)
-            Button(onClick = {
-                Log.d("Test", ""+backStack.toList().count())
-            }) { Text("click")}
+//            Text("State: "+uiState)
+//            Text("Stack: "+backStack.toList())
+//            Text("IsInSub: "+isInSubNavigation.value)
+//            Button(onClick = {
+//                Log.d("Test", ""+backStack.toList().count())
+//            }) { Text("click")}
         }
         if (uiState == AuthUiState.Loading) {
             LoadingScreen()

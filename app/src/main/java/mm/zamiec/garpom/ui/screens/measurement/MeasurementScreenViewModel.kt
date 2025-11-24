@@ -43,6 +43,13 @@ class MeasurementScreenViewModel @AssistedInject constructor(
         }
     }
 
+    fun deleteMeasurement() {
+        viewModelScope.launch {
+            _uiState.value = measurementDetailsManager.deleteMeasurement(measurementId)
+        }
+
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(stationId: String): MeasurementScreenViewModel
