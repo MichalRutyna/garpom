@@ -51,21 +51,22 @@ val TAG = "ConfigureScreen"
 @SuppressLint("MissingPermission")
 @Composable
 fun ConfigureScreen(
-    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    configureViewModel: ConfigureScreenViewModel = hiltViewModel(),
+    onStationChosen: (String) -> Unit,
 ) {
     val activity = LocalActivity.current
 
-    val configureState = bluetoothViewModel.uiState.collectAsStateWithLifecycle()
-    val scanResultsState = bluetoothViewModel.scanResults
+    val configureState = configureViewModel.uiState.collectAsStateWithLifecycle()
+    val scanResultsState = configureViewModel.scanResults
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions.values.all { it }
         if (granted) {
-            bluetoothViewModel.onPermissionsGranted()
+            configureViewModel.onPermissionsGranted()
         } else {
-            bluetoothViewModel.onPermissionsDenied()
+            configureViewModel.onPermissionsDenied()
         }
     }
 
@@ -77,7 +78,7 @@ fun ConfigureScreen(
                 Log.d(TAG, "Bluetooth enable canceled")
             }
             RESULT_OK -> {
-                bluetoothViewModel.onBluetoothEnabled()
+                configureViewModel.onBluetoothEnabled()
             }
         }
     }
@@ -85,7 +86,7 @@ fun ConfigureScreen(
     when (val s = configureState.value.screenState) {
         ScreenState.Initial -> {
             InitialScreen(
-                onPair = { bluetoothViewModel.initialConfiguration(activity!!) }
+                onPair = { configureViewModel.initialConfiguration(activity!!) }
             )
         }
         ScreenState.Scanning -> {
@@ -102,8 +103,8 @@ fun ConfigureScreen(
         ScreenState.ScanResults -> {
             ScanResults(
                 scanResultsState,
-                { bluetoothViewModel.initialConfiguration(activity!!) },
-                onResultClicked = { bluetoothViewModel.connectToResultByAddress(it) }
+                { configureViewModel.initialConfiguration(activity!!) },
+                onResultClicked = { onStationChosen(it) }
             )
         }
         is ScreenState.PairingError -> {
@@ -118,54 +119,26 @@ fun ConfigureScreen(
         is ScreenState.ServiceDiscoveryData -> {
             ServiceDiscoveryDataScreen(s)
         }
-
-        is ScreenState.TempStationScreen -> {
-            val red = remember { TextFieldState() }
-            val green = remember { TextFieldState() }
-            val blue = remember { TextFieldState() }
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Button(onClick = { bluetoothViewModel.discoverServices(s.station) }) {
-                    Text("Discover services")
-                }
-                Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextField(red, modifier = Modifier.weight(0.3f).padding(5.dp))
-                    TextField(green, modifier = Modifier.weight(0.3f).padding(5.dp))
-                    TextField(blue, modifier = Modifier.weight(0.3f).padding(5.dp))
-                }
-                Button(onClick = { bluetoothViewModel.testLight(
-                    s.station,
-                    red.text.toString().toInt(),
-                    green.text.toString().toInt(),
-                    blue.text.toString().toInt(),
-                ) }) {
-                    Text("Test light")
-                }
-            }
-        }
     }
 
     when (configureState.value.dialog) {
         DialogState.DeviceIncompatible -> {
-            DeviceIncompatibleDialog { bluetoothViewModel.clearDialog() }
+            DeviceIncompatibleDialog { configureViewModel.clearDialog() }
         }
         DialogState.PermissionsDenied -> {
-            BluetoothRejectedDialog { bluetoothViewModel.clearDialog() }
+            BluetoothRejectedDialog { configureViewModel.clearDialog() }
         }
         DialogState.PermissionExplanationNeeded -> {
             BluetoothExplanationDialog(
-                onDismiss = { bluetoothViewModel.onPermissionsDenied() },
-                onConfirm = { bluetoothViewModel.onExplanationAccepted() }
+                onDismiss = { configureViewModel.onPermissionsDenied() },
+                onConfirm = { configureViewModel.onExplanationAccepted() }
             )
         }
         null -> {}
     }
 
     LaunchedEffect(Unit) {
-        bluetoothViewModel.setRequestPermissionsCallback {
+        configureViewModel.setRequestPermissionsCallback {
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
@@ -174,7 +147,7 @@ fun ConfigureScreen(
                 )
             )
         }
-        bluetoothViewModel.setBluetoothEnableCallback {
+        configureViewModel.setBluetoothEnableCallback {
             btEnableLauncher.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
         }
     }
@@ -192,7 +165,7 @@ private fun InitialScreen(
         Text("Configure")
         Button(onClick = onPair
         ) {
-            Text("Pair")
+            Text("Scan")
         }
     }
 }

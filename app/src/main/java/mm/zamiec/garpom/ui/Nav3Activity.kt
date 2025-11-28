@@ -45,6 +45,8 @@ import mm.zamiec.garpom.ui.screens.measurement.measurementScreenScaffoldElements
 import mm.zamiec.garpom.ui.screens.profile.ProfileScreen
 import mm.zamiec.garpom.ui.screens.station.StationScreen
 import mm.zamiec.garpom.ui.screens.station.stationScaffoldElements
+import mm.zamiec.garpom.ui.screens.station_config.StationConfigScreen
+import mm.zamiec.garpom.ui.screens.station_config.stationConfigScaffoldElements
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
 
 @AndroidEntryPoint
@@ -132,10 +134,17 @@ class Nav3Activity : ComponentActivity() {
                         }
                         entry<BottomNavDestination.Configure> {
                             scaffoldElements = ScaffoldElements()
-                            ConfigureScreen()
+                            ConfigureScreen(
+                                onStationChosen = { address ->
+                                    backStack.add(StationConfig(address))
+                                }
+                            )
                         }
                         entry<StationConfig> { key ->
-                            // TODO station config
+                            scaffoldElements = stationConfigScaffoldElements(key.address, onBack = { backStack.removeLastOrNull() })
+                            StationConfigScreen(
+                                key.address
+                            )
                         }
                         entry<BottomNavDestination.Profile> {
                             scaffoldElements = ScaffoldElements()

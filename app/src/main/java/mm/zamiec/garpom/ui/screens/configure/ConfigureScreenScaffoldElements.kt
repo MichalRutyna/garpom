@@ -8,9 +8,9 @@ import mm.zamiec.garpom.ui.ScaffoldElements
 
 @Composable
 fun configureScreenScaffoldElements(
-    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    configureViewModel: ConfigureScreenViewModel = hiltViewModel(),
 ) : ScaffoldElements {
-    val uiState by bluetoothViewModel.uiState.collectAsState()
+    val uiState = configureViewModel.uiState.collectAsState().value
 
     val scaffoldElements: ScaffoldElements =
         when (val state = uiState.screenState) {

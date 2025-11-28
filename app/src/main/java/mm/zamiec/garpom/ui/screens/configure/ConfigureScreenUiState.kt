@@ -7,8 +7,6 @@ sealed class ScreenState {
     object Scanning : ScreenState()
     object ScanResults : ScreenState()
     data class PairingError(val message: String) : ScreenState()
-
-    data class TempStationScreen(val station: BluetoothGatt) : ScreenState()
     data class ServiceDiscoveryData(
         val serviceData: MutableList<HashMap<String, String>>,
         val characteristicsData: MutableList<ArrayList<HashMap<String, String>>>

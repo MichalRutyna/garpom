@@ -66,7 +66,7 @@ data class AlarmConfig(
 
 @Serializable
 data class StationConfig(
-    val id: String
+    val address: String
 ) : NavKey
 
 
