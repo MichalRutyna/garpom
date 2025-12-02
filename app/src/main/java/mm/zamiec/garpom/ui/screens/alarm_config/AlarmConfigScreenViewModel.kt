@@ -110,10 +110,9 @@ class AlarmConfigScreenViewModel @AssistedInject constructor(
         )
         viewModelScope.launch {
             alarmConfigManager.saveUiState(uiState)
+        }.invokeOnCompletion {
+            _uiState.value = AlarmConfigUiState.GoBack
         }
-//            .invokeOnCompletion {
-//            _uiState.value = AlarmConfigUiState.GoBack
-//        }
     }
 
     fun resetSliders() {
@@ -121,10 +120,6 @@ class AlarmConfigScreenViewModel @AssistedInject constructor(
         editState.value.sliderPositions.putAll(cardsToMap(uiState.value as AlarmConfigUiState.ConfigData))
     }
 
-    fun backed() {
-        _uiState.value = AlarmConfigUiState.Loading
-        Log.d("configViewModel", "backed")
-    }
 
     @AssistedFactory
     interface Factory {

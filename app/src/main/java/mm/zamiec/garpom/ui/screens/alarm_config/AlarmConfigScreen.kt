@@ -25,6 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +64,9 @@ fun AlarmConfigScreen(
 
     when (uiState) {
         is AlarmConfigUiState.GoBack ->
-            { alarmConfigViewModel.backed(); onBack() }
+            LaunchedEffect(Unit) {
+                onBack()
+            }
         is AlarmConfigUiState.Loading ->
             { AlarmConfigLoadingScreen() }
         is AlarmConfigUiState.ConfigData -> {

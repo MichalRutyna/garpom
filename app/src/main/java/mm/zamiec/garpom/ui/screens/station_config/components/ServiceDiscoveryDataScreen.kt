@@ -1,4 +1,4 @@
-package mm.zamiec.garpom.ui.screens.configure.components
+package mm.zamiec.garpom.ui.screens.station_config.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,10 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import mm.zamiec.garpom.ui.screens.configure.ScreenState
+import mm.zamiec.garpom.ui.screens.station_config.StationConfigUiState
 
 @Composable
 fun ServiceDiscoveryDataScreen(
-    data: ScreenState.ServiceDiscoveryData
+    data: StationConfigUiState.ServiceDiscoveryData
 ) {
     LazyColumn(
         modifier = Modifier

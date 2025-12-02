@@ -143,7 +143,8 @@ class Nav3Activity : ComponentActivity() {
                         entry<StationConfig> { key ->
                             scaffoldElements = stationConfigScaffoldElements(key.address, onBack = { backStack.removeLastOrNull() })
                             StationConfigScreen(
-                                key.address
+                                key.address,
+                                onBack = { backStack.removeLastOrNull() }
                             )
                         }
                         entry<BottomNavDestination.Profile> {

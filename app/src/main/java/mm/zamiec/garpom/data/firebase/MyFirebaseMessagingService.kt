@@ -1,23 +1,46 @@
 package mm.zamiec.garpom.data.firebase
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import dagger.hilt.android.AndroidEntryPoint
+import mm.zamiec.garpom.R
 import mm.zamiec.garpom.domain.usecase.TokenUseCase
 import javax.inject.Inject
 import kotlin.collections.isNotEmpty
 import kotlin.let
 
-@AndroidEntryPoint
-class MyFirebaseMessagingService @Inject constructor(private val serverInteractor: TokenUseCase)
-    : FirebaseMessagingService() {
+class MyFirebaseMessagingService : FirebaseMessagingService() {
+
+    @Inject
+    lateinit var serverInteractor: TokenUseCase
 
     private val TAG = "MyFirebaseMsgService"
 
     @Inject
     lateinit var auth: FirebaseAuth
+
+    override fun onCreate() {
+        val channelId = getString(R.string.channel_alarms_id)
+        val channelName = getString(R.string.channel_alarms_name)
+
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(channelId, channelName, importance).apply {
+            description = "Notifications when your alarms go off"
+            enableLights(true)
+            lightColor = Color.BLUE
+            enableVibration(true)
+        }
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+        super.onCreate()
+    }
 
 
     override fun onNewToken(token: String) {

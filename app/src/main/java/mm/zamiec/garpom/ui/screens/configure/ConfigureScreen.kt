@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mm.zamiec.garpom.R
-import mm.zamiec.garpom.ui.screens.configure.components.ServiceDiscoveryDataScreen
+import mm.zamiec.garpom.ui.screens.station_config.components.ServiceDiscoveryDataScreen
 
 val TAG = "ConfigureScreen"
 
@@ -115,9 +115,6 @@ fun ConfigureScreen(
             ) {
                 Text("Pairing error: " + s.message)
             }
-        }
-        is ScreenState.ServiceDiscoveryData -> {
-            ServiceDiscoveryDataScreen(s)
         }
     }
 
