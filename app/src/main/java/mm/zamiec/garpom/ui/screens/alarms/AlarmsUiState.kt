@@ -15,9 +15,9 @@ data class StationAlarmsItemUiState (
 )
 
 data class AlarmSummaryItemUiState (
-    val alarmId: String,
-    val name: String,
-    val recentlyWentOff: Boolean,
+    val alarmId: String = "",
+    val name: String = "",
+    val recentlyWentOff: Boolean = false,
 )
 
 data class AlarmOccurrenceItemUiState(
