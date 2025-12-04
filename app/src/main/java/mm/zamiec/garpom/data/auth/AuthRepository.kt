@@ -226,7 +226,7 @@ sealed class PhoneVerificationStatus {
     data class VerificationCompleted(val credential: PhoneAuthCredential) : PhoneVerificationStatus()
     data class CodeSent(
         val verificationId: String,
-        val token: PhoneAuthProvider.ForceResendingToken
+        val token: PhoneAuthProvider.ForceResendingToken = PhoneAuthProvider.ForceResendingToken.CREATOR.newArray(1)[0]
     ) : PhoneVerificationStatus()
     data class Error(val message: String) : PhoneVerificationStatus()
 
