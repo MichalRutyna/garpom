@@ -1,15 +1,12 @@
 package mm.zamiec.garpom.domain.managers
 
 
-import android.util.Log
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import mm.zamiec.garpom.data.auth.AuthRepository
-import mm.zamiec.garpom.data.dataRepositories.AlarmConditionRepository
-import mm.zamiec.garpom.data.dataRepositories.AlarmOccurrenceRepository
-import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
-import mm.zamiec.garpom.data.dataRepositories.MeasurementRepository
 import mm.zamiec.garpom.data.dataRepositories.StationRepository
+import mm.zamiec.garpom.data.interfaces.IAlarmRepository
+import mm.zamiec.garpom.data.interfaces.IAuthRepository
+import mm.zamiec.garpom.data.interfaces.IStationRepository
 import mm.zamiec.garpom.domain.model.Alarm
 import mm.zamiec.garpom.domain.model.AlarmCondition
 import mm.zamiec.garpom.domain.model.Parameter
@@ -18,16 +15,14 @@ import mm.zamiec.garpom.ui.screens.alarm_config.ParameterCardFactory
 import mm.zamiec.garpom.ui.screens.alarm_config.ParameterRangeCard
 import mm.zamiec.garpom.ui.screens.alarm_config.StationChoice
 import mm.zamiec.garpom.ui.screens.alarm_config.getInitialRangesMutableMap
-import java.time.Instant
-import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AlarmConfigManager @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val alarmRepository: AlarmRepository,
-    private val stationRepository: StationRepository,
+    private val authRepository: IAuthRepository,
+    private val alarmRepository: IAlarmRepository,
+    private val stationRepository: IStationRepository,
 ) {
 
     suspend fun alarmDetails(alarmId: String): AlarmConfigUiState {

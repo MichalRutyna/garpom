@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import mm.zamiec.garpom.data.interfaces.IAuthRepository
 import mm.zamiec.garpom.domain.model.AppUser
 import mm.zamiec.garpom.domain.usecase.TokenUseCase
 import java.util.concurrent.Executor
@@ -33,20 +34,20 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 
 @Singleton
-class AuthRepository @Inject constructor(
+open class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val serverInteractor: TokenUseCase,
     private val appUserRepository: AppUserRepository,
-) {
+) : IAuthRepository {
 
     val TAG = "AuthRepository"
 
     val executor: Executor = Executor { it.run() }
 
-    val userExists: Boolean
+    override val userExists: Boolean
         get() = firebaseAuth.currentUser != null
 
-    val currentUser: StateFlow<AppUser> = callbackFlow {
+    override val currentUser: StateFlow<AppUser> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { auth ->
             val firebaseUser = auth.currentUser
 
@@ -84,7 +85,7 @@ class AuthRepository @Inject constructor(
     )
 
 
-    fun signInAnonymously() {
+    override fun signInAnonymously() {
         firebaseAuth.signInAnonymously()
             .addOnCompleteListener(executor) { task ->
                 if (task.isSuccessful) {
@@ -104,13 +105,13 @@ class AuthRepository @Inject constructor(
         serverInteractor.ensureToken()
     }
 
-    fun signOut() {
+    override fun signOut() {
         Log.d(TAG, "Signing out")
         firebaseAuth.signOut()
         signInAnonymously()
     }
 
-    suspend fun changeUsername(username: String): ChangeUsernameResult =
+    override suspend fun changeUsername(username: String): ChangeUsernameResult =
         suspendCancellableCoroutine { cont ->
             val user = firebaseAuth.currentUser
             if (user == null) {
@@ -133,9 +134,9 @@ class AuthRepository @Inject constructor(
             }
         }
 
-    fun startPhoneNumberVerification(
+    override fun startPhoneNumberVerification(
         phoneNumber: String,
-        timeout: Long = 60L
+        timeout: Long
     ): Flow<PhoneVerificationStatus> = callbackFlow {
         Log.d(TAG, "launched phone verification flow")
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -169,14 +170,14 @@ class AuthRepository @Inject constructor(
         Log.d(TAG, "phone verification flow closed")
     }
 
-    suspend fun getCredentialWithCode(
+    override suspend fun getCredentialWithCode(
         verificationId: String,
         code: String
     ): PhoneAuthCredential {
         return PhoneAuthProvider.getCredential(verificationId, code)
     }
 
-    suspend fun linkWithCredential(credential: AuthCredential): VerificationResult {
+    override suspend fun linkWithCredential(credential: AuthCredential): VerificationResult {
         if (firebaseAuth.currentUser == null) {
             Log.e(TAG, "Link called when no account was set")
             return VerificationResult.Error("Fatal error")
@@ -207,7 +208,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun signInWithCredential(credential: AuthCredential): VerificationResult {
+    override suspend fun signInWithCredential(credential: AuthCredential): VerificationResult {
         Log.d(TAG, "Signing in with credentials")
         return try {
             firebaseAuth.signInWithCredential(credential).await()

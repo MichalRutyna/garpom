@@ -10,20 +10,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import mm.zamiec.garpom.data.dto.AlarmConditionDto
 import mm.zamiec.garpom.data.firebase.collectionByIdsAsFlow
 import mm.zamiec.garpom.data.firebase.documentAsFlow
 import mm.zamiec.garpom.data.dto.AlarmDto
 import mm.zamiec.garpom.data.firebase.filteredArrayContainsCollectionAsFlow
+import mm.zamiec.garpom.data.interfaces.IAlarmRepository
 import mm.zamiec.garpom.domain.model.Alarm
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AlarmRepository @Inject constructor(
+open class AlarmRepository @Inject constructor(
     private val alarmConditionRepository: AlarmConditionRepository
-) {
+): IAlarmRepository {
     companion object {
         private val TAG = "AlarmRepository"
     }
@@ -80,7 +80,7 @@ class AlarmRepository @Inject constructor(
         )
     }
 
-    fun getAlarmById(id: String): Flow<Alarm?> {
+    override fun getAlarmById(id: String): Flow<Alarm?> {
         val alarms = db.documentAsFlow("alarms", id, ::dtoMapper, ::domainMapper)
         val conditionsFlow = alarmConditionRepository.getConditionsByAlarm(id)
         return combine(alarms, conditionsFlow) { alarm, conditions ->
@@ -88,7 +88,7 @@ class AlarmRepository @Inject constructor(
         }
     }
 
-    fun getAlarmsByIdList(ids: List<String>): Flow<List<Alarm>> {
+    override fun getAlarmsByIdList(ids: List<String>): Flow<List<Alarm>> {
        return db.collectionByIdsAsFlow("alarms", ids, ::dtoMapper, ::domainMapper)
             .map { alarms ->
                  alarms.map { alarm ->
@@ -99,7 +99,7 @@ class AlarmRepository @Inject constructor(
     }
 
 
-    fun getAlarmsByStation(stationId: String): Flow<List<Alarm>> {
+    override fun getAlarmsByStation(stationId: String): Flow<List<Alarm>> {
         return db.filteredArrayContainsCollectionAsFlow("alarms", "stations", stationId, ::dtoMapper, ::domainMapper)
             .map { alarms ->
                 alarms.map { alarm ->
@@ -109,7 +109,7 @@ class AlarmRepository @Inject constructor(
             }
     }
 
-    suspend fun saveAlarm(alarm: Alarm, userId: String) {
+    override suspend fun saveAlarm(alarm: Alarm, userId: String) {
         val conditions = alarm.conditions
         val alarmDto = domainToDto(alarm, userId)
 

@@ -53,6 +53,10 @@ android {
     buildFeatures {
         compose = true
     }
+    defaultConfig {
+        // Replace com.example.android.dagger with your class path.
+        testInstrumentationRunner = "mm.zamiec.garpom.CustomTestRunner"
+    }
 }
 
 dependencies {
@@ -107,6 +111,9 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.57.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
 }
 
 
