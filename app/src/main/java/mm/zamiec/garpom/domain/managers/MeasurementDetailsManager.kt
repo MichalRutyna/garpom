@@ -77,8 +77,7 @@ class MeasurementDetailsManager @Inject constructor(
                     Parameter.PRESSURE to measurement.pressure
                 ).map { (type, level) ->
                     MeasurementCardFactory.create(type, level, occurrenceMap[type] ?: emptyList())
-                },
-                FireCard(measurement.fire)
+                }
             )
         } catch (e: Exception) {
             MeasurementScreenState.Error(e.message ?: "Unknown error")

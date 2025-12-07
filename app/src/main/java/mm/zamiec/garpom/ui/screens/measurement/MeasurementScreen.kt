@@ -99,53 +99,7 @@ private fun MeasurementDataScreen(
             MeasurementCard(card, onAlarmClick)
             Spacer(Modifier.padding(top = 10.dp))
         }
-        item {
-            FireCard(uiState)
-        }
     }
-}
-
-@Composable
-private fun FireCard(uiState: MeasurementScreenState.MeasurementData) {
-    HorizontalDivider()
-    if (uiState.fire.value) {
-        Box(
-            modifier = Modifier
-                .background(Color.Red.copy(alpha = 0.4f))
-                .fillMaxWidth()
-                .padding(10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Rounded.Warning,
-                    "FIRE!"
-                )
-                Text("Station detected a fire!")
-            }
-        }
-    } else {
-        Box(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .fillMaxWidth()
-                .padding(10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Rounded.CheckCircle,
-                    "All good"
-                )
-                Text("No fire detected! ")
-            }
-        }
-    }
-    HorizontalDivider()
 }
 
 @Composable
@@ -274,8 +228,7 @@ fun Preview() {
                 listOf(
                 )
             )
-        ),
-        fire = FireCard(true)
+        )
     )
     MeasurementDataScreen(
         uistate,

@@ -1,5 +1,7 @@
 package mm.zamiec.garpom.ui.screens.home
 
+import java.time.LocalDateTime
+
 data class StationSummaryItemUiState(
     val stationId: String = "",
     val name: String = "",
@@ -10,7 +12,8 @@ data class StationSummaryItemUiState(
 
 data class RecentAlarmOccurrenceItemUiState(
     val alarmName: String = "",
-    val measurementId: String = ""
+    val measurementId: String = "",
+    val date: LocalDateTime = LocalDateTime.now()
 )
 
 data class HomeUiState(

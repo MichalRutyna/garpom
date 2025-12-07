@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AlarmsScreen(
@@ -108,7 +109,7 @@ private fun AlarmOccurrenceItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            alarmOccurrence.alarmName,
+            alarmOccurrence.alarmName + " (" + alarmOccurrence.date.format(DateTimeFormatter.ofPattern("MMM dd")) + ")",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
         )
@@ -146,7 +147,7 @@ private fun RecentOccurrenceItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            alarmOccurrence.alarmName,
+            alarmOccurrence.alarmName + " (" + alarmOccurrence.date.format(DateTimeFormatter.ofPattern("MMM dd")) + ")",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f),
         )

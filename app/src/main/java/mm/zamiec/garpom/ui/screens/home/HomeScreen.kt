@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import mm.zamiec.garpom.ui.ui.theme.GarPomTheme
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeScreen(
@@ -108,8 +109,8 @@ private fun HomeScreenContent(
                 }),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(alarm.alarmName,
-//                        style = MaterialTheme.typography.bodyMedium,
+                val recentName = alarm.alarmName + " (" + alarm.date.format(DateTimeFormatter.ofPattern("MMM dd")) + ")"
+                Text(recentName,
                     modifier = Modifier.weight(1f))
 
 

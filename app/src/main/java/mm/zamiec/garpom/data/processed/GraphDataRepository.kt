@@ -33,6 +33,15 @@ class GraphDataRepository @Inject constructor(
         val measurements: List<Measurement> =
             measurementsFilteredRepository
                 .getHourlyMeasurements(stationId, start, end)
+
+        if (measurements.isEmpty()) {
+            return RepositoryResponse(
+                values = Parameter.entries.associateWith { emptyList<Double>() },
+                labels = emptyList(),
+                count = 0
+            )
+        }
+
         val dates = measurements.map {it.date}
         val newValues: Map<Parameter, List<Double>> =
             Parameter.entries.associateWith { parameter ->
@@ -76,6 +85,15 @@ class GraphDataRepository @Inject constructor(
         val measurements: Map<LocalDate, Average> =
             measurementsFilteredRepository
                 .getDailyMeasurements(stationId, start, end)
+
+        if (measurements.isEmpty()) {
+            return RepositoryResponse(
+                values = Parameter.entries.associateWith { emptyList<Double>() },
+                labels = emptyList(),
+                count = 0
+            )
+        }
+
         val dates = measurements.keys.toList()
         val newValues: Map<Parameter, List<Double>> =
             Parameter.entries.associateWith { parameter ->
@@ -114,6 +132,15 @@ class GraphDataRepository @Inject constructor(
         val measurements: Map<LocalDate, Average> =
             measurementsFilteredRepository
                 .getWeeklyMeasurements(stationId, start, end)
+
+        if (measurements.isEmpty()) {
+            return RepositoryResponse(
+                values = Parameter.entries.associateWith { emptyList<Double>() },
+                labels = emptyList(),
+                count = 0
+            )
+        }
+
         val dates = measurements.keys.toList()
         val newValues: Map<Parameter, List<Double>> =
             Parameter.entries.associateWith { parameter ->

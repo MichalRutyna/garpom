@@ -41,7 +41,7 @@ class StationViewModel @AssistedInject constructor(
         _uiState.value = StationScreenUiState.Loading
         viewModelScope.launch {
             val stationDetailsFlow = stationDetailsManager.stationDetails(stationId)
-            // create a one-shot flow so we can combine, and keep listening to details
+            // create a one-shot flow so we can combine, and keep listening to stationDetails
             val graphDataFlow = flow {
                 emit(graphDataManager.initialGraph(stationId, PeriodSelection.LastWeek, setOf(Parameter.TEMPERATURE)))
             }

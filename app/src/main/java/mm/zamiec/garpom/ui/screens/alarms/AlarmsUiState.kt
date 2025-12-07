@@ -1,6 +1,7 @@
 package mm.zamiec.garpom.ui.screens.alarms
 
 import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
+import java.time.LocalDateTime
 
 data class AlarmsUiState (
     val stationAlarmsList: List<StationAlarmsItemUiState> = emptyList(),
@@ -22,5 +23,6 @@ data class AlarmSummaryItemUiState (
 
 data class AlarmOccurrenceItemUiState(
     val alarmName: String = "",
-    val measurementId: String = ""
+    val measurementId: String = "",
+    val date: LocalDateTime = LocalDateTime.now(),
 )

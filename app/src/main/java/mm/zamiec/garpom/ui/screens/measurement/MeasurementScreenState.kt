@@ -11,8 +11,7 @@ open class MeasurementScreenState () {
         val stationId: String = "",
         val date: LocalDateTime,
 
-        val cards: List<MeasurementCard>,
-        val fire: FireCard,
+        val cards: List<MeasurementCard>
     ): MeasurementScreenState()
 
     data class Error(val message: String) : MeasurementScreenState()

@@ -14,6 +14,7 @@ import mm.zamiec.garpom.data.firebase.documentAsFlow
 import mm.zamiec.garpom.data.dto.MeasurementDto
 import mm.zamiec.garpom.data.firebase.queryAsFlow
 import mm.zamiec.garpom.domain.model.Measurement
+import mm.zamiec.garpom.domain.model.Parameter
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
@@ -32,14 +33,11 @@ class MeasurementRepository @Inject constructor() {
             id = doc.id,
             stationId = stationId,
             date = date,
-            airHumidity = doc.getDouble("air_humidity"),
-            groundHumidity = doc.getDouble("ground_humidity"),
-            co = doc.getDouble("co"),
-            pressure = doc.getDouble("pressure"),
-            light = doc.getDouble("light"),
-            temperature = doc.getDouble("temperature"),
-            ph = doc.getDouble("ph"),
-            fire = doc.getBoolean("fire_detected"),
+            airHumidity = doc.getDouble(Parameter.AIR_HUMIDITY.dbName),
+            groundHumidity = doc.getDouble(Parameter.GROUND_HUMIDITY.dbName),
+            pressure = doc.getDouble(Parameter.PRESSURE.dbName),
+            light = doc.getDouble(Parameter.LIGHT.dbName),
+            temperature = doc.getDouble(Parameter.TEMPERATURE.dbName),
         )
     }
 
@@ -50,14 +48,11 @@ class MeasurementRepository @Inject constructor() {
             date = dto.date.toDate().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime(),
-            co = dto.co,
             airHumidity = dto.airHumidity,
             groundHumidity = dto.groundHumidity,
             light = dto.light,
             pressure = dto.pressure,
             temperature = dto.temperature,
-            ph = dto.ph,
-            fire = dto.fire
         )
 
     fun getMeasurementById(id: String): Flow<Measurement?> =

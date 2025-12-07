@@ -32,12 +32,10 @@ class MeasurementsFilteredRepository @Inject constructor(
             .mapValues { (_, list) ->
                 Average(
                     temperature = list.mapNotNull { it.temperature }.average(),
-                    co = list.mapNotNull { it.co }.average(),
                     airHumidity = list.mapNotNull { it.airHumidity }.average(),
                     groundHumidity = list.mapNotNull { it.groundHumidity }.average(),
                     light = list.mapNotNull { it.light }.average(),
                     pressure = list.mapNotNull { it.pressure }.average(),
-                    ph = list.mapNotNull { it.ph }.average(),
                 )
             }
         Log.d("filteredRepo", dailyAverages.toString())
@@ -61,12 +59,10 @@ class MeasurementsFilteredRepository @Inject constructor(
             .mapValues { (_, list) ->
                 Average(
                     temperature = list.mapNotNull { it.temperature }.average(),
-                    co = list.mapNotNull { it.co }.average(),
                     airHumidity = list.mapNotNull { it.airHumidity }.average(),
                     groundHumidity = list.mapNotNull { it.groundHumidity }.average(),
                     light = list.mapNotNull { it.light }.average(),
                     pressure = list.mapNotNull { it.pressure }.average(),
-                    ph = list.mapNotNull { it.ph }.average(),
                 )
             }
     }

@@ -19,6 +19,8 @@ import mm.zamiec.garpom.data.dataRepositories.AlarmRepository
 import mm.zamiec.garpom.ui.screens.alarms.AlarmOccurrenceItemUiState
 import mm.zamiec.garpom.ui.screens.home.RecentAlarmOccurrenceItemUiState
 import mm.zamiec.garpom.di.ApplicationScope
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,11 +64,12 @@ class AlarmOccurrencesListManager @Inject constructor (
                 val flows = occurrences.map { occurrence ->
                     alarmRepository.getAlarmById(occurrence.alarmId).mapLatest { alarm ->
                         if (alarm == null)
-                            return@mapLatest AlarmOccurrenceItemUiState("", "") //TODO
+                            return@mapLatest AlarmOccurrenceItemUiState("", occurrence.measurementId, LocalDateTime.ofInstant(occurrence.date, ZoneId.systemDefault()))
                         // single query
                         AlarmOccurrenceItemUiState(
                             alarm.name,
-                            occurrence.measurementId
+                            occurrence.measurementId,
+                            date = LocalDateTime.ofInstant(occurrence.date, ZoneId.systemDefault())
                         )
                     }
                 }
@@ -96,7 +99,8 @@ class AlarmOccurrencesListManager @Inject constructor (
                         occurrences.map { occ ->
                             RecentAlarmOccurrenceItemUiState(
                                 alarmName = alarmMap[occ.alarmId]?.name ?: "Unknown alarm",
-                                measurementId = occ.measurementId
+                                measurementId = occ.measurementId,
+                                date = LocalDateTime.ofInstant(occ.date, ZoneId.systemDefault())
                             )
                         }
                     }
