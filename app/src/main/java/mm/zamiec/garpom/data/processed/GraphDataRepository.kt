@@ -18,7 +18,7 @@ class GraphDataRepository @Inject constructor(
     val measurementsFilteredRepository: MeasurementsFilteredRepository
 ) {
     val dayFormatter = DateTimeFormatter.ofPattern("MMM dd", Locale.getDefault())
-    val hourFormatter = DateTimeFormatter.ofPattern("MMM dd, HH:mm", Locale.getDefault())
+    val hourFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
 
     suspend fun getResponseForParameterInTimeRangeAndPeriodSelection(stationId: String, periodSelection: PeriodSelection, start: LocalDateTime, end: LocalDateTime): RepositoryResponse {
         return when (periodSelection) {
