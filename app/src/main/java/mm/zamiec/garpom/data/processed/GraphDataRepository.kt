@@ -40,10 +40,8 @@ class GraphDataRepository @Inject constructor(
                     when (parameter) {
                         Parameter.TEMPERATURE -> measurement.temperature
                         Parameter.AIR_HUMIDITY -> measurement.airHumidity
-                        Parameter.CO -> measurement.co
                         Parameter.GROUND_HUMIDITY -> measurement.groundHumidity
                         Parameter.LIGHT -> measurement.light
-                        Parameter.PH -> measurement.ph
                         Parameter.PRESSURE -> measurement.pressure
                     }
                 }
@@ -85,10 +83,8 @@ class GraphDataRepository @Inject constructor(
                     when (parameter) {
                         Parameter.TEMPERATURE -> average.temperature.nanSafe()
                         Parameter.AIR_HUMIDITY -> average.airHumidity.nanSafe()
-                        Parameter.CO -> average.co.nanSafe()
                         Parameter.GROUND_HUMIDITY -> average.groundHumidity.nanSafe()
                         Parameter.LIGHT -> average.light.nanSafe()
-                        Parameter.PH -> average.ph.nanSafe()
                         Parameter.PRESSURE -> average.pressure.nanSafe()
                     }
                 }
@@ -125,10 +121,8 @@ class GraphDataRepository @Inject constructor(
                     when (parameter) {
                         Parameter.TEMPERATURE -> average.temperature.nanSafe()
                         Parameter.AIR_HUMIDITY -> average.airHumidity.nanSafe()
-                        Parameter.CO -> average.co.nanSafe()
                         Parameter.GROUND_HUMIDITY -> average.groundHumidity.nanSafe()
                         Parameter.LIGHT -> average.light.nanSafe()
-                        Parameter.PH -> average.ph.nanSafe()
                         Parameter.PRESSURE -> average.pressure.nanSafe()
                     }
                 }

@@ -385,10 +385,6 @@ private fun Preview() {
                 920.0, Double.POSITIVE_INFINITY,
             ),
             ParameterCardFactory.create(
-                Parameter.PH,
-                Double.NEGATIVE_INFINITY, 6.0
-            ),
-            ParameterCardFactory.create(
                 Parameter.AIR_HUMIDITY,
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY
             ),

@@ -38,10 +38,8 @@ fun getInitialRangesMutableMap(): MutableMap<Parameter, Pair<Double, Double>> {
     val rangesMap = listOf(
         Parameter.TEMPERATURE to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
         Parameter.AIR_HUMIDITY to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
-        Parameter.CO to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
         Parameter.GROUND_HUMIDITY to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
         Parameter.LIGHT to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
-        Parameter.PH to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
         Parameter.PRESSURE to (Double.NEGATIVE_INFINITY to Double.POSITIVE_INFINITY),
     ).toMap().toMutableMap()
     return rangesMap

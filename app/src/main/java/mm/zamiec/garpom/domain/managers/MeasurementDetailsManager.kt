@@ -72,10 +72,8 @@ class MeasurementDetailsManager @Inject constructor(
                 cards = listOf(
                     Parameter.TEMPERATURE to measurement.temperature,
                     Parameter.AIR_HUMIDITY to measurement.airHumidity,
-                    Parameter.CO to measurement.co,
                     Parameter.GROUND_HUMIDITY to measurement.groundHumidity,
                     Parameter.LIGHT to measurement.light,
-                    Parameter.PH to measurement.ph,
                     Parameter.PRESSURE to measurement.pressure
                 ).map { (type, level) ->
                     MeasurementCardFactory.create(type, level, occurrenceMap[type] ?: emptyList())

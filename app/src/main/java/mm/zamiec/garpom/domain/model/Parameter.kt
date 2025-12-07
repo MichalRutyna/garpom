@@ -9,25 +9,19 @@ enum class Parameter(
     val maxValue: Double,
     val icon: IconType
 ) {
-    TEMPERATURE("Temperature", "°C", "temperature",
+    TEMPERATURE("Temperature", "°C", "temperatureAir",
         "temperatures", -30.0, 50.0,
         IconType.Dataset),
-    AIR_HUMIDITY("Air humidity", "%", "air_humidity",
+    AIR_HUMIDITY("Air humidity", "%", "humidityAir",
         "air humidity levels", 0.0, 100.0,
         IconType.Dataset),
-    CO("CO", "ppm", "co",
-        "carbon dioxide levels", 0.0, 100.0, // TODO maxval
-        IconType.Dataset),
-    GROUND_HUMIDITY("Ground humidity", "%", "ground_humidity",
+    GROUND_HUMIDITY("Ground humidity", "%", "humiditySoil",
         "ground humidity levels", 0.0, 100.0,
         IconType.Dataset),
-    LIGHT("Light level", " lux", "light",
+    LIGHT("Light level", " lux", "sunlight",
         "light levels", 1.0, 350.0,
         IconType.Dataset),
-    PH("Ground pH", "pH", " ph",
-        "pH levels", 0.0, 14.0,
-        IconType.Dataset),
-    PRESSURE("Air pressure", " bar", "pressure",
+    PRESSURE("Air pressure", " bar", "pressureAir",
         "pressure levels", 900.0, 1200.0,
         IconType.Dataset)
 }

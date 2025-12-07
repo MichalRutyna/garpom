@@ -168,10 +168,8 @@ class GraphDataManager @Inject constructor(
             when(parameter) {
                 Parameter.TEMPERATURE -> Color(0xFFE15759)
                 Parameter.AIR_HUMIDITY -> Color(0xFF76B7B2)
-                Parameter.CO -> Color(0xFFB07AA1)
                 Parameter.GROUND_HUMIDITY -> Color(0xFF4E79A7)
                 Parameter.LIGHT -> Color(0xFFEDC948)
-                Parameter.PH -> Color(0xFFF28E2B)
                 Parameter.PRESSURE -> Color(0xFF59A14F)
             }
         return Line(
