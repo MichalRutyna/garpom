@@ -63,13 +63,13 @@ fun StationConfigScreen(
 
         is StationConfigUiState.WifiList -> {
             Column {
-                Row {
-                    Text("Show services data")
-                    Switch(
-                        characteristicSwitch.value,
-                        stationConfigViewModel::onCharacteristicSwitched
-                    )
-                }
+//                Row {
+//                    Text("Show services data")
+//                    Switch(
+//                        characteristicSwitch.value,
+//                        stationConfigViewModel::onCharacteristicSwitched
+//                    )
+//                }
                 StationConfigContent(s,
                     wifiList.value,
                     onNetworkClicked = stationConfigViewModel::networkChosen,
@@ -122,11 +122,11 @@ private fun StationConfigContent(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        item {
-            LightTest(
-                onLightTestClicked
-            )
-        }
+//        item {
+//            LightTest(
+//                onLightTestClicked
+//            )
+//        }
         item {
             Text("The station found the following networks:", textAlign = TextAlign.Center, modifier = Modifier
                 .fillMaxWidth()

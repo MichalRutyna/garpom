@@ -202,7 +202,7 @@ private fun ScanResults(
                         .padding(bottom = 12.dp)
                 ) {
                     Button(onClick = { onResultClicked(item.address) }) {
-                        Text(item.address, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
+                        Text(item.name, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(10.dp))
                     }
                 }
             }

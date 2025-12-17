@@ -83,7 +83,7 @@ class GraphDataManager @Inject constructor(
                     getLineForParameter(it)
                         .copy(
                             values = data.values[it] ?: emptyList(),
-                            label = it.title,
+                            label = it.title + " (" + it.unit + ")",
                             strokeProgress = Animatable(0f), gradientProgress = Animatable(0f) // reset line animation
                         )
                 }

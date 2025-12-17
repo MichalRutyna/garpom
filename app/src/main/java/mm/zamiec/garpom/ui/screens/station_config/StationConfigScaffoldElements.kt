@@ -59,7 +59,7 @@ fun stationConfigScaffoldElements(
                     modifier = Modifier.Companion.padding(start = 5.dp, top = 5.dp, end = 5.dp),
                     autoSize = TextAutoSize.Companion.StepBased(
                         minFontSize = 10.sp,
-                        maxFontSize = 40.sp,
+                        maxFontSize = 35.sp,
                         stepSize = 2.sp
                     ),
                 )

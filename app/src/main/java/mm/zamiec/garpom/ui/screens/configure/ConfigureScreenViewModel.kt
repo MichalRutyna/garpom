@@ -58,7 +58,6 @@ class ConfigureScreenViewModel @Inject constructor (
 //            _uiState.value = _uiState.value.copy(dialog = DialogState.DeviceIncompatible)
 //            return
 //        }
-
         if (!hasBtPermissions()) {
             val shouldShowRationaleScan = ActivityCompat.shouldShowRequestPermissionRationale(
                 activity, Manifest.permission.BLUETOOTH_SCAN
@@ -84,6 +83,11 @@ class ConfigureScreenViewModel @Inject constructor (
         try {
             _uiState.value = _uiState.value.copy(screenState = ScreenState.Scanning)
             scanResults.clear()
+
+            scanResults.add(StationScanResult(
+                address = "",
+                name = "New GarPom station"
+            ))
             seenAddresses.clear()
             btManager.initiatePairing(
                 resultCallback = { result ->
@@ -112,7 +116,7 @@ class ConfigureScreenViewModel @Inject constructor (
             scanResults.add(
                 StationScanResult(
                     result.device.address,
-                    result.device.name ?: ""
+                    result.device.name ?: "Unknown device"
                 )
             )
         }
