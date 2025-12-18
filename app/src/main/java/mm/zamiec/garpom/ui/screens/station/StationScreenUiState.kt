@@ -29,7 +29,7 @@ data class MeasurementSummaryItemUiState (
     val measurementId: String = "",
 )
 
-open class NotificationItemUiState(
+sealed class NotificationItemUiState(
     val message: String = "",
     val icon: ImageVector = Icons.Filled.Notifications,
     val iconDescription: String = "",

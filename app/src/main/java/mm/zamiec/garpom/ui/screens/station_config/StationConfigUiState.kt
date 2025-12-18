@@ -1,22 +1,22 @@
 package mm.zamiec.garpom.ui.screens.station_config
 
-sealed class StationConfigUiState {
-    data object WifiList: StationConfigUiState()
+interface StationConfigUiState {
+    data object WifiList: StationConfigUiState
 
-    data object Connecting : StationConfigUiState()
+    data object Connecting : StationConfigUiState
 
     data class ServiceDiscoveryData(
         val serviceData: MutableList<HashMap<String, String>> = mutableListOf(),
         val characteristicsData: MutableList<ArrayList<HashMap<String, String>>> = mutableListOf(),
-    ): StationConfigUiState()
+    ): StationConfigUiState
 
     data class PasswordInput(
         val selection: WifiSelection
-    ): StationConfigUiState()
+    ): StationConfigUiState
 
     data class Error(
         val message: String
-    ): StationConfigUiState()
+    ): StationConfigUiState
 }
 
 data class WifiSelection (

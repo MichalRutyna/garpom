@@ -19,6 +19,6 @@ data class RecentAlarmOccurrenceItemUiState(
 data class HomeUiState(
     val isAnonymous: Boolean = true,
     val username: String = "",
-    val stations: List<StationSummaryItemUiState> = listOf(),
-    val recentAlarmOccurrences: List<RecentAlarmOccurrenceItemUiState> = listOf(),
+    val stations: List<StationSummaryItemUiState> = emptyList(),
+    val recentAlarmOccurrences: List<RecentAlarmOccurrenceItemUiState> = emptyList(),
 )

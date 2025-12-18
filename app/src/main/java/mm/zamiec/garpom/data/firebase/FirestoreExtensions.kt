@@ -17,19 +17,21 @@ fun <T, D> queryAsFlow(
     dtoMapper: (doc: DocumentSnapshot) -> T?,
     domainMapper: (dto: T) -> D?,
 ): Flow<List<D>> = callbackFlow {
-    val listener: ListenerRegistration = query.addSnapshotListener { snapshot, error ->
-        if (error != null) {
-            close(error)
-            return@addSnapshotListener
-        }
+    val listener: ListenerRegistration =
+        query
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
 
-        val items = snapshot?.documents
-            ?.mapNotNull { dtoMapper(it) }
-            ?.mapNotNull { domainMapper(it) }
-            .orEmpty()
+                val items = snapshot?.documents
+                    ?.mapNotNull { dtoMapper(it) }
+                    ?.mapNotNull { domainMapper(it) }
+                    .orEmpty()
 
-        trySend(items).isSuccess
-    }
+                trySend(items).isSuccess
+            }
     awaitClose { listener.remove() }
 }
 
@@ -63,7 +65,11 @@ fun <T, D> FirebaseFirestore.filteredCollectionAsFlow(
     dtoMapper: (doc: DocumentSnapshot) -> T?,
     domainMapper: (dto: T) -> D?,
 ): Flow<List<D>> =
-    queryAsFlow(collection(collectionPath).whereEqualTo(field, value), dtoMapper, domainMapper)
+    queryAsFlow(
+        collection(collectionPath).whereEqualTo(field, value),
+        dtoMapper,
+        domainMapper
+    )
 
 
 fun <T, D> FirebaseFirestore.filteredArrayContainsCollectionAsFlow(
@@ -73,7 +79,11 @@ fun <T, D> FirebaseFirestore.filteredArrayContainsCollectionAsFlow(
     dtoMapper: (doc: DocumentSnapshot) -> T?,
     domainMapper: (dto: T) -> D?,
 ): Flow<List<D>> =
-    queryAsFlow(collection(collectionPath).whereArrayContains(arrayField, value), dtoMapper, domainMapper)
+    queryAsFlow(
+        collection(collectionPath).whereArrayContains(arrayField, value),
+        dtoMapper,
+        domainMapper
+    )
 
 
 fun <T, D> FirebaseFirestore.collectionByIdsAsFlow(

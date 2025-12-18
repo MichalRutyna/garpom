@@ -42,6 +42,7 @@ interface AlarmConfigUiState {
 
     object GoBack : AlarmConfigUiState
 }
+
 data class StationChoice (
     val stationId: String,
     val stationName: String,
@@ -49,7 +50,7 @@ data class StationChoice (
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
-// Non-saved, specific data
+// Non-saved, ui-specific data
 class AlarmConfigEditState {
     var alarmEnabled = mutableStateOf(false)
 

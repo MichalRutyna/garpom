@@ -1,16 +1,16 @@
 package mm.zamiec.garpom.ui.screens.configure
 
 sealed class ScreenState {
-    object Initial : ScreenState()
-    object Scanning : ScreenState()
-    object ScanResults : ScreenState()
+    data object Initial : ScreenState()
+    data object Scanning : ScreenState()
+    data object ScanResults : ScreenState()
     data class PairingError(val message: String) : ScreenState()
 }
 
 sealed class DialogState {
-    object PermissionExplanationNeeded : DialogState()
-    object PermissionsDenied : DialogState()
-    object DeviceIncompatible : DialogState()
+    data object PermissionExplanationNeeded : DialogState()
+    data object PermissionsDenied : DialogState()
+    data object DeviceIncompatible : DialogState()
 }
 
 data class ConfigureUiState(
@@ -18,7 +18,7 @@ data class ConfigureUiState(
     val dialog: DialogState? = null
 )
 
-class StationScanResult(
+data class StationScanResult(
     val address: String,
     val name: String
 )
