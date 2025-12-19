@@ -34,8 +34,19 @@ open class StationRepository @Inject constructor() : IStationRepository {
         )
 
     override fun getStationById(id: String): Flow<Station?> =
-        db.documentAsFlow("stations", id, ::dtoMapper, ::domainMapper)
+        db.documentAsFlow(
+            "stations",
+            id,
+            ::dtoMapper,
+            ::domainMapper
+        )
 
     override fun getStationsByOwner(ownerId: String): Flow<List<Station>> =
-        db.filteredCollectionAsFlow("stations", "owner_id", ownerId, ::dtoMapper, ::domainMapper)
+        db.filteredCollectionAsFlow(
+            "stations",
+            "owner_id",
+            ownerId,
+            ::dtoMapper,
+            ::domainMapper
+        )
 }

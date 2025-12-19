@@ -84,7 +84,7 @@ private fun HomeScreenContent(
                         "This station has a problem"
                     )
                 }
-                 Icon(
+                Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     "Show details")
 
@@ -109,16 +109,19 @@ private fun HomeScreenContent(
                 }),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val recentName = alarm.alarmName + " (" + alarm.date.format(DateTimeFormatter.ofPattern("MMM dd")) + ")"
+                val recentName =
+                    alarm.alarmName +
+                            " (" +
+                            alarm.date
+                                .format(
+                                    DateTimeFormatter.ofPattern("MMM dd")
+                                ) +
+                            ")"
                 Text(recentName,
                     modifier = Modifier.weight(1f))
-
-
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     "Show details")
-
-
             }
             HorizontalDivider(Modifier.padding(horizontal = 10.dp))
         }

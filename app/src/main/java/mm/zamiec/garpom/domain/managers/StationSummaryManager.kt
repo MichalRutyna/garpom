@@ -22,7 +22,8 @@ class StationSummaryManager @Inject constructor(
 
     private val repository: StationRepository
 ) {
-    fun stationsSummaryForUser(): Flow<List<StationSummaryItemUiState>> = _stationsSummaryForUserCache
+    fun stationsSummaryForUser(): Flow<List<StationSummaryItemUiState>> =
+        _stationsSummaryForUserCache
 
     init {
         authRepository.currentUser
@@ -34,7 +35,8 @@ class StationSummaryManager @Inject constructor(
             .launchIn(scope)
     }
 
-    private val _stationsSummaryForUserCache = MutableStateFlow<List<StationSummaryItemUiState>>(emptyList())
+    private val _stationsSummaryForUserCache =
+        MutableStateFlow<List<StationSummaryItemUiState>>(emptyList())
     private var _stationsSummaryForUserJob: Job? = null
 
 
